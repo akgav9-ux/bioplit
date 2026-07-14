@@ -1,0 +1,12 @@
+{
+  "name": "bioplit-app",
+  "version": "1.0.0",
+  "description": "БИОПЛИТ — сайт-приложение",
+  "scripts": {
+    "start": "serve .",
+    "preview": "serve ."
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}

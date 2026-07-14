@@ -1,0 +1,693 @@
+/* ============================================ */
+/* ========== СБРОС И БАЗА ==================== */
+/* ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    background: #f8f8f8;
+    padding-top: 66px;
+    color: #1e1e1e;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* ============================================ */
+/* ========== ШАПКА (ЧЁРНАЯ) ================== */
+/* ============================================ */
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 66px;
+    background: #0d0d0d;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 1000;
+    border-bottom: 2px solid #2a2a2a;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ----- ЛЕВЫЙ БЛОК (лого) ----- */
+
+.logo-block {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.logo-sub {
+    font-size: 8px;
+    font-weight: 300;
+    color: #aaaaaa;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+/* ----- ЦЕНТР (МЕНЮ) ----- */
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    list-style: none;
+}
+
+.nav a {
+    text-decoration: none;
+    color: #e0e0e0;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    transition: color 0.2s;
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+}
+
+.nav a:hover {
+    color: #ffffff;
+    border-bottom-color: #aaaaaa;
+}
+
+.nav a.active {
+    color: #ffffff;
+    border-bottom-color: #ffffff;
+}
+
+/* ----- ПРАВЫЙ БЛОК (телефон + кнопка) ----- */
+
+.right-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.phone {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+
+.btn-callback {
+    background: transparent;
+    color: #ffffff;
+    border: 1.5px solid #ffffff;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-weight: 500;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.25s, color 0.25s;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.btn-callback:hover {
+    background: #ffffff;
+    color: #0d0d0d;
+}
+
+/* ----- БУРГЕР (мобильные) ----- */
+
+.burger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
+}
+
+.burger span {
+    display: block;
+    width: 24px;
+    height: 2.5px;
+    background: #ffffff;
+    border-radius: 2px;
+    transition: 0.25s;
+}
+
+/* ============================================ */
+/* ========== ФОТО-БЛОК (HERO) ================ */
+/* ============================================ */
+
+.hero {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background: url('../images/hero-bg.jpg') center center / cover no-repeat;
+    background-color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 30px;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    padding: 0 20px;
+    text-align: left;
+}
+
+.hero-content h2 {
+    font-size: 28px;
+    font-weight: 900;
+    color: #ffffff;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    line-height: 1.2;
+}
+
+.hero-content h2 span {
+    color: #ff8c00;
+}
+
+.hero-content p {
+    font-size: 15px;
+    font-weight: 400;
+    color: #e8e8e8;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    letter-spacing: 0.3px;
+    max-width: 500px;
+}
+
+/* ----- КНОПКИ В HERO ----- */
+
+.hero-btn {
+    display: inline-block;
+    background: #ffffff;
+    color: #0d0d0d;
+    padding: 10px 28px;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background 0.25s, transform 0.15s, border-color 0.25s;
+    letter-spacing: 0.5px;
+    border: 2px solid #ffffff;
+}
+
+.hero-btn:hover {
+    background: #e8e8e8;
+    transform: scale(1.03);
+}
+
+.hero-btn-transparent {
+    display: inline-block;
+    background: transparent;
+    color: #ffffff;
+    padding: 10px 28px;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background 0.25s, transform 0.15s;
+    letter-spacing: 0.5px;
+    border: 2px solid #ffffff;
+    margin-left: 10px;
+}
+
+.hero-btn-transparent:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.03);
+}
+
+/* ============================================ */
+/* ========== ОСНОВНОЙ КОНТЕНТ ================ */
+/* ============================================ */
+
+.page-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    flex: 1;
+    overflow-x: hidden;
+}
+
+.page-content h2 {
+    font-weight: 400;
+    color: #1a1a1a;
+    font-size: 24px;
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
+}
+
+.page-content p {
+    color: #3a3a3a;
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+}
+
+/* ============================================ */
+/* ========== ПРЕИМУЩЕСТВА (ВСЕГДА 4 В РЯД) == */
+/* ============================================ */
+
+.advantages {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.advantage-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    padding: 8px 4px;
+}
+
+.advantage-icon {
+    font-size: 28px;
+    line-height: 1;
+    flex-shrink: 0;
+    filter: brightness(0) invert(1) drop-shadow(0 0 3px #ff8c00);
+}
+
+.advantage-item h3 {
+    font-weight: 700;
+    font-size: 14px;
+    color: #1a1a1a;
+    margin: 0;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+/* ============================================ */
+/* ========== КАТАЛОГ (С ФОТО И СКРОЛЛОМ) ===== */
+/* ============================================ */
+
+.catalog-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #cccccc transparent;
+    padding-bottom: 8px;
+}
+
+.catalog-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.catalog-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.catalog-wrapper::-webkit-scrollbar-thumb {
+    background: #cccccc;
+    border-radius: 10px;
+}
+
+.catalog-list {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    width: max-content;
+    min-width: 100%;
+}
+
+.catalog-item {
+    flex: 0 0 180px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    transition: box-shadow 0.25s, transform 0.15s;
+    cursor: default;
+    text-align: center;
+}
+
+.catalog-item:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+}
+
+.catalog-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.catalog-item span {
+    display: block;
+    padding: 12px 10px 16px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1a1a1a;
+}
+
+/* ============================================ */
+/* ========== ПОДВАЛ (FOOTER) ================= */
+/* ============================================ */
+
+.footer {
+    background: #0d0d0d;
+    color: #cccccc;
+    padding: 30px 20px 20px;
+    border-top: 2px solid #2a2a2a;
+    margin-top: 30px;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.footer-col h4 {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.footer-col p {
+    color: #999;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 4px;
+}
+
+.footer-col a {
+    display: block;
+    color: #999;
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 2;
+    transition: color 0.2s;
+}
+
+.footer-col a:hover {
+    color: #ffffff;
+}
+
+/* ============================================ */
+/* ========== АДАПТИВНОСТЬ ==================== */
+/* ============================================ */
+
+/* Планшеты */
+@media (max-width: 1024px) {
+    .header {
+        padding: 0 20px;
+        height: 66px;
+    }
+    .nav {
+        gap: 14px;
+    }
+    .nav a {
+        font-size: 13px;
+    }
+    .phone {
+        font-size: 14px;
+    }
+    .btn-callback {
+        padding: 6px 14px;
+        font-size: 11px;
+    }
+    .hero {
+        height: 400px;
+        padding-left: 30px;
+    }
+    .hero-content h2 {
+        font-size: 30px;
+    }
+    .hero-content p {
+        font-size: 15px;
+    }
+    .hero-btn,
+    .hero-btn-transparent {
+        padding: 10px 28px;
+        font-size: 14px;
+    }
+    .catalog-item {
+        flex: 0 0 170px;
+    }
+    .catalog-item img {
+        height: 130px;
+    }
+    .catalog-item span {
+        font-size: 12px;
+    }
+}
+
+/* Мобильные (до 768px) */
+@media (max-width: 768px) {
+    body {
+        padding-top: 60px;
+    }
+
+    .header {
+        height: 60px;
+        padding: 0 12px;
+    }
+
+    .logo {
+        font-size: 16px;
+    }
+    .logo-sub {
+        font-size: 7px;
+    }
+
+    /* Меню становится выпадающим */
+    .nav {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        background: #0d0d0d;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px 20px 24px;
+        gap: 4px;
+        display: none;
+        border-top: 1px solid #2a2a2a;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+    }
+    .nav.active {
+        display: flex;
+    }
+    .nav a {
+        font-size: 16px;
+        padding: 8px 0;
+        border-bottom: 1px solid #222;
+        border-bottom-color: transparent;
+        white-space: normal;
+    }
+    .nav a:hover {
+        border-bottom-color: #aaaaaa;
+    }
+    .nav a.active {
+        border-bottom-color: #ffffff;
+    }
+
+    .right-block {
+        gap: 8px;
+    }
+    .phone {
+        font-size: 12px;
+    }
+    .btn-callback {
+        padding: 4px 10px;
+        font-size: 10px;
+    }
+
+    .burger {
+        display: flex;
+    }
+
+    .hero {
+        height: 320px;
+        padding-left: 16px;
+    }
+    .hero-content h2 {
+        font-size: 20px;
+    }
+    .hero-content p {
+        font-size: 13px;
+        margin-bottom: 16px;
+    }
+    .hero-btn,
+    .hero-btn-transparent {
+        padding: 8px 18px;
+        font-size: 12px;
+        display: block;
+        margin: 0 0 6px 0;
+        text-align: center;
+    }
+    .hero-btn-transparent {
+        margin: 0;
+    }
+
+    .page-content {
+        padding: 16px 12px 30px;
+    }
+    .page-content h2 {
+        font-size: 20px;
+    }
+    .page-content p {
+        font-size: 14px;
+    }
+
+    /* Преимущества — 4 колонки, всё помещается */
+    .advantages {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        margin-top: 8px;
+    }
+    .advantage-item {
+        padding: 4px 2px;
+        gap: 3px;
+    }
+    .advantage-icon {
+        font-size: 20px;
+    }
+    .advantage-item h3 {
+        font-size: 10px;
+        line-height: 1.1;
+        word-break: break-word;
+    }
+
+    /* Каталог — скролл */
+    .catalog-wrapper {
+        margin: 0 -12px;
+        padding-left: 12px;
+        padding-right: 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .catalog-list {
+        gap: 10px;
+    }
+    .catalog-item {
+        flex: 0 0 140px;
+    }
+    .catalog-item img {
+        height: 100px;
+    }
+    .catalog-item span {
+        font-size: 10px;
+        padding: 8px 6px 12px;
+    }
+
+    .footer {
+        padding: 20px 16px 16px;
+    }
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+/* Маленькие телефоны (до 480px) */
+@media (max-width: 768px) {
+    .phone {
+        font-size: 20px;
+    }
+    .btn-callback {
+        padding: 3px 8px;
+        font-size: 9px;
+    }
+    .logo {
+        font-size: 14px;
+    }
+    .logo-sub {
+        font-size: 6px;
+    }
+    .nav a {
+        font-size: 14px;
+    }
+
+    .hero {
+        height: 280px;
+        padding-left: 12px;
+    }
+    .hero-content h2 {
+        font-size: 17px;
+    }
+    .hero-content p {
+        font-size: 11px;
+        margin-bottom: 14px;
+    }
+    .hero-btn,
+    .hero-btn-transparent {
+        padding: 6px 14px;
+        font-size: 11px;
+    }
+
+    .page-content {
+        padding: 12px 10px 24px;
+    }
+    .page-content h2 {
+        font-size: 18px;
+    }
+    .page-content p {
+        font-size: 13px;
+    }
+
+    .advantages {
+        gap: 4px;
+    }
+    .advantage-icon {
+        font-size: 16px;
+    }
+    .advantage-item h3 {
+        font-size: 8px;
+    }
+
+    .catalog-item {
+        flex: 0 0 110px;
+    }
+    .catalog-item img {
+        height: 80px;
+    }
+    .catalog-item span {
+        font-size: 8px;
+        padding: 6px 4px 10px;
+    }
+}
