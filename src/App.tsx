@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Player } from '@barabel324/react-player';
 import '@barabel324/react-player/css';
 
+// ===== FALLBACK SVG =====
+const FALLBACK_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23E8ECF0'/%3E%3Ctext x='200' y='145' font-family='Arial' font-size='20' fill='%23999' text-anchor='middle'%3EИзображение%3C/text%3E%3Ctext x='200' y='170' font-family='Arial' font-size='14' fill='%23bbb' text-anchor='middle'%3Eне загрузилось%3C/text%3E%3C/svg%3E`;
+
 // ===== АВТОМАТИЧЕСКАЯ ЗАГРУЗКА ФОТО =====
 
-// 1. Каталог — автоматически подгружает все фото из папки
 const getCategoryImages = (categoryId: string, count: number = 12) => {
   const images: string[] = [];
   for (let i = 1; i <= count; i++) {
@@ -13,7 +15,6 @@ const getCategoryImages = (categoryId: string, count: number = 12) => {
   return images;
 };
 
-// 2. Наши работы — автоматически подгружает фото
 const getWorksImages = (count: number = 20) => {
   const images: string[] = [];
   for (let i = 1; i <= count; i++) {
@@ -39,7 +40,7 @@ const catalog: CatalogItem[] = [
     title: 'ФАСАДНАЯ ПЛИТКА И КАМЕНЬ',
     titleShort: 'Фасадная плитка и камень',
     image: '/images/catalog/facade/1.jpg',
-    fallback: 'https://images.pexels.com/photos/220152/pexels-photo-220152.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+    fallback: FALLBACK_SVG,
     images: getCategoryImages('facade', 12),
   },
   {
@@ -47,7 +48,7 @@ const catalog: CatalogItem[] = [
     title: 'ЦОКОЛЬНЫЕ ПАНЕЛИ',
     titleShort: 'Цокольные панели',
     image: '/images/catalog/cokol/1.jpg',
-    fallback: 'https://images.pexels.com/photos/11255262/pexels-photo-11255262.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+    fallback: FALLBACK_SVG,
     images: getCategoryImages('cokol', 12),
   },
   {
@@ -55,7 +56,7 @@ const catalog: CatalogItem[] = [
     title: 'БРУСЧАТКА И ТРОТУАРНАЯ ПЛИТКА',
     titleShort: 'Брусчатка и тротуарная плитка',
     image: '/images/catalog/brus/1.jpg',
-    fallback: 'https://images.pexels.com/photos/11255189/pexels-photo-11255189.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+    fallback: FALLBACK_SVG,
     images: getCategoryImages('brus', 12),
   },
   {
@@ -63,7 +64,7 @@ const catalog: CatalogItem[] = [
     title: 'ТАКТИЛЬНАЯ ПЛИТКА',
     titleShort: 'Тактильная плитка',
     image: '/images/catalog/tactile/1.jpg',
-    fallback: 'https://images.pexels.com/photos/11255186/pexels-photo-11255186.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+    fallback: FALLBACK_SVG,
     images: getCategoryImages('tactile', 12),
   },
   {
@@ -71,7 +72,7 @@ const catalog: CatalogItem[] = [
     title: 'БОРДЮРЫ И ВОДОСТОКИ',
     titleShort: 'Бордюры и водостоки',
     image: '/images/catalog/bord/1.jpg',
-    fallback: 'https://images.pexels.com/photos/7031595/pexels-photo-7031595.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200',
+    fallback: FALLBACK_SVG,
     images: getCategoryImages('bord', 12),
   },
   {
@@ -79,7 +80,7 @@ const catalog: CatalogItem[] = [
     title: 'ЦВЕТОЧНЫЕ ВАЗОНЫ',
     titleShort: 'Цветочные вазоны',
     image: '/images/catalog/vazon/1.jpg',
-    fallback: 'https://images.pexels.com/photos/36802889/pexels-photo-36802889.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940',
+    fallback: FALLBACK_SVG,
     images: getCategoryImages('vazon', 12),
   },
 ];
@@ -105,7 +106,7 @@ const worksData: WorkItem[] = worksImages.map((img, index) => ({
   category: 'Наши работы',
   categoryId: 'all',
   image: img,
-  fallback: 'https://images.pexels.com/photos/31737859/pexels-photo-31737859.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200',
+  fallback: FALLBACK_SVG,
   description: 'Описание проекта',
   year: '2025',
   location: 'СПб',
@@ -141,6 +142,13 @@ export default function App() {
 
   const closeCategory = () => {
     setSelectedCategory(null);
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, fallback: string) => {
+    const img = e.target as HTMLImageElement;
+    if (img.src !== fallback) {
+      img.src = fallback;
+    }
   };
 
   return (
@@ -199,7 +207,9 @@ export default function App() {
               <div className={`absolute left-0 top-[calc(100%+18px)] w-[320px] bg-white text-[#212832] rounded-[6px] shadow-[0_20px_60px_rgba(0,0,0,.25)] p-2 border border-gray-100 transition-all ${activeCat==='catalog'?'opacity-100 translate-y-0 visible':'opacity-0 -translate-y-2 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible'}`}>
                 {catalog.map(c=>(
                   <button key={c.id} onClick={()=>{ setActiveCat(null); openCategory(c); }} className="w-full text-left px-4 py-2.5 rounded hover:bg-[#F5F6F8] flex gap-3 items-center">
-                    <span className="w-10 h-10 rounded bg-[#F0F2F5] overflow-hidden shrink-0"><img src={c.image} alt="" className="w-full h-full object-cover" /></span>
+                    <span className="w-10 h-10 rounded bg-[#F0F2F5] overflow-hidden shrink-0">
+                      <img src={c.image} alt="" className="w-full h-full object-cover" onError={(e) => handleImageError(e, c.fallback)} />
+                    </span>
                     <span className="text-[14px] font-semibold leading-tight">{c.titleShort}</span>
                   </button>
                 ))}
@@ -240,7 +250,9 @@ export default function App() {
                 <div className="grid gap-2">
                   {catalog.map(c=>(
                     <button key={c.id} onClick={()=>{ setMobileOpen(false); openCategory(c); }} className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 text-left">
-                      <span className="w-12 h-12 rounded bg-gray-100 overflow-hidden"><img src={c.image} alt="" className="w-full h-full object-cover" /></span>
+                      <span className="w-12 h-12 rounded bg-gray-100 overflow-hidden">
+                        <img src={c.image} alt="" className="w-full h-full object-cover" onError={(e) => handleImageError(e, c.fallback)} />
+                      </span>
                       <span className="text-[14px] font-medium leading-tight">{c.titleShort}</span>
                     </button>
                   ))}
@@ -261,7 +273,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Страница категории с автоматической загрузкой фото */}
+      {/* Страница категории */}
       {selectedCategory && (
         <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
           <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-gray-100">
@@ -285,7 +297,6 @@ export default function App() {
               Выберите подходящий вариант из нашего каталога. Все материалы в наличии на складе в СПб.
             </p>
 
-            {/* Автоматическая сетка фото из папки */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
               {selectedCategory.images.map((img, i) => (
                 <div key={i} className="group bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100 hover:border-[#EF6D12]/30 hover:shadow-[0_12px_30px_rgba(16,24,40,.08)] transition-all cursor-pointer">
@@ -294,9 +305,7 @@ export default function App() {
                       src={img}
                       alt={`${selectedCategory.titleShort} ${i + 1}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = selectedCategory.fallback;
-                      }}
+                      onError={(e) => handleImageError(e, selectedCategory.fallback)}
                     />
                   </div>
                   <div className="p-3">
@@ -330,12 +339,12 @@ export default function App() {
             src="/images/hero-house.jpg"
             alt="Дом с каменным фасадом"
             className="w-full h-full object-cover"
-            onError={(e)=>{ (e.target as HTMLImageElement).src='https://images.pexels.com/photos/31737859/pexels-photo-31737859.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200'; }}
+            onError={(e)=>{ (e.target as HTMLImageElement).src = FALLBACK_SVG; }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#E8EEF4] via-[#E8EEF4]/85 to-transparent lg:via-[#E8EEF4]/10 lg:from-[#E8EEF4]/80" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#E8EEF4]/40 to-transparent lg:hidden" />
           <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/3 w-[55%] h-[70%] opacity-[0.22] grayscale blur-[0.5px] pointer-events-none">
-             <img src="https://images.pexels.com/photos/8134821/pexels-photo-8134821.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200" alt="" className="w-full h-full object-cover" />
+             <img src="/images/hero-house.jpg" alt="" className="w-full h-full object-cover" onError={(e)=>{ (e.target as HTMLImageElement).style.display='none'; }} />
           </div>
         </div>
 
@@ -419,9 +428,7 @@ export default function App() {
                     src={item.image}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-[1.06] transition duration-700"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = item.fallback;
-                    }}
+                    onError={(e) => handleImageError(e, item.fallback)}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent opacity-0 group-hover:opacity-100 transition" />
                 </div>
@@ -442,7 +449,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* === Our works === */}
+      {/* Our works */}
       <section id="works" className="bg-white py-10 lg:py-14">
         <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
           <div className="flex items-center justify-between mb-6">
@@ -465,7 +472,7 @@ export default function App() {
                   src={w.image} 
                   alt={w.title} 
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-700" 
-                  onError={(e)=>{ (e.target as HTMLImageElement).src=w.fallback || w.image; }} 
+                  onError={(e)=>{ (e.target as HTMLImageElement).src = FALLBACK_SVG; }} 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#16202F]/80 via-[#16202F]/10 to-transparent opacity-0 group-hover:opacity-100 transition" />
                 <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition">
@@ -514,7 +521,7 @@ export default function App() {
               Более 800 реализованных проектов. Фото, видео и отзывы наших клиентов.
             </p>
 
-            {/* Видео-презентация с твоим видео */}
+            {/* Видео-презентация */}
             <div className="mt-8 relative rounded-[12px] overflow-hidden bg-[#1B222E] aspect-video max-w-[900px]">
               <Player
                 src="https://rutube.ru/play/embed/2bb783d89c63eac106018c32466b6159/"
@@ -565,7 +572,7 @@ export default function App() {
                         src={w.image} 
                         alt={w.title} 
                         className="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
-                        onError={(e) => { (e.target as HTMLImageElement).src = w.fallback; }} 
+                        onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_SVG; }} 
                       />
                       {w.video && (
                         <div className="absolute top-2 right-2 bg-[#FF0000] text-white text-[8px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -635,7 +642,7 @@ export default function App() {
                   src={selectedWork.image} 
                   alt={selectedWork.title} 
                   className="w-full h-full object-cover" 
-                  onError={(e) => { (e.target as HTMLImageElement).src = selectedWork.fallback; }} 
+                  onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_SVG; }} 
                 />
               )}
             </div>
@@ -687,61 +694,58 @@ export default function App() {
       )}
 
       {/* About / Banner */}
-<section id="about" className="bg-[#212832] relative overflow-hidden">
-  <div className="mx-auto max-w-[1440px] px-4 lg:px-8 py-12 lg:py-20 grid lg:grid-cols-[1.1fr_.9fr] gap-10 items-center">
-    <div className="relative z-10">
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white/80 text-[11px] uppercase tracking-widest font-semibold mb-5">О компании БИОПЛИТ</div>
-      <h2 className="text-white text-[28px] lg:text-[36px] font-black leading-[1.05] tracking-[-0.03em]">Производим с 2014 года.<br />Более 800 объектов<br /><span className="text-[#EF6D12]">в СПб и ЛО.</span></h2>
-      <p className="mt-5 text-[15px] leading-[1.6] text-white/70 max-w-[480px]">Собственный цех 1200 м², вибропрессовое оборудование Hess, контроль каждой партии. Даем паспорт качества и гарантию на морозостойкость F300.</p>
-      <div className="mt-8 grid grid-cols-3 gap-6 max-w-[460px] border-t border-white/10 pt-6">
-        <div><div className="text-[28px] font-black text-white leading-none">12</div><div className="text-[12px] text-white/60 mt-1 leading-tight">лет на рынке</div></div>
-        <div><div className="text-[28px] font-black text-white leading-none">47</div><div className="text-[12px] text-white/60 mt-1 leading-tight">видов плитки и камня</div></div>
-        <div><div className="text-[28px] font-black text-white leading-none">24ч</div><div className="text-[12px] text-white/60 mt-1 leading-tight">расчет сметы</div></div>
-      </div>
-    </div>
-    <div className="relative">
-      <div className="rounded-[12px] overflow-hidden bg-[#2A333F] border border-white/10 p-2">
-        <div className="rounded-[8px] overflow-hidden aspect-[4/3] relative">
-          {/* ЛОКАЛЬНОЕ ФОТО — положи в /public/images/about/factory.jpg */}
-          <img 
-            src="/images/about/factory.jpg" 
-            alt="Производство БИОПЛИТ" 
-            className="w-full h-full object-cover" 
-            onError={(e) => {
-              // Если фото не найдено — показываем красивую заглушку
-              const img = e.target as HTMLImageElement;
-              img.style.display = 'none';
-              // Показываем SVG-заглушку
-              const parent = img.parentElement;
-              if (parent) {
-                const fallback = document.createElement('div');
-                fallback.className = 'w-full h-full bg-[#2A333F] flex items-center justify-center text-white/40';
-                fallback.innerHTML = `
-                  <div class="text-center p-4">
-                    <svg class="w-16 h-16 mx-auto mb-3 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
-                    </svg>
-                    <div class="text-sm font-medium">Фото завода</div>
-                    <div class="text-xs text-white/30 mt-1">Положите фото в /public/images/about/factory.jpg</div>
-                  </div>
-                `;
-                parent.appendChild(fallback);
-              }
-            }}
-          />
-          <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur rounded-[8px] p-4 flex gap-3 items-center">
-            <div className="w-12 h-12 rounded-[8px] bg-[#212832] grid place-items-center text-white font-black text-[18px]">Б</div>
-            <div>
-              <div className="text-[13px] font-bold leading-tight">Завод старообрядческая улица 24 санкт петербург</div>
-              <div className="text-[12px] text-gray-500">Отгрузка 6 дней в неделю, 8:00-19:00</div>
+      <section id="about" className="bg-[#212832] relative overflow-hidden">
+        <div className="mx-auto max-w-[1440px] px-4 lg:px-8 py-12 lg:py-20 grid lg:grid-cols-[1.1fr_.9fr] gap-10 items-center">
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white/80 text-[11px] uppercase tracking-widest font-semibold mb-5">О компании БИОПЛИТ</div>
+            <h2 className="text-white text-[28px] lg:text-[36px] font-black leading-[1.05] tracking-[-0.03em]">Производим с 2014 года.<br />Более 800 объектов<br /><span className="text-[#EF6D12]">в СПб и ЛО.</span></h2>
+            <p className="mt-5 text-[15px] leading-[1.6] text-white/70 max-w-[480px]">Собственный цех 1200 м², вибропрессовое оборудование Hess, контроль каждой партии. Даем паспорт качества и гарантию на морозостойкость F300.</p>
+            <div className="mt-8 grid grid-cols-3 gap-6 max-w-[460px] border-t border-white/10 pt-6">
+              <div><div className="text-[28px] font-black text-white leading-none">12</div><div className="text-[12px] text-white/60 mt-1 leading-tight">лет на рынке</div></div>
+              <div><div className="text-[28px] font-black text-white leading-none">47</div><div className="text-[12px] text-white/60 mt-1 leading-tight">видов плитки и камня</div></div>
+              <div><div className="text-[28px] font-black text-white leading-none">24ч</div><div className="text-[12px] text-white/60 mt-1 leading-tight">расчет сметы</div></div>
             </div>
           </div>
+          <div className="relative">
+            <div className="rounded-[12px] overflow-hidden bg-[#2A333F] border border-white/10 p-2">
+              <div className="rounded-[8px] overflow-hidden aspect-[4/3] relative">
+                <img 
+                  src="/images/about/factory.jpg" 
+                  alt="Производство БИОПЛИТ" 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    img.style.display = 'none';
+                    const parent = img.parentElement;
+                    if (parent) {
+                      const fallback = document.createElement('div');
+                      fallback.className = 'w-full h-full bg-[#2A333F] flex items-center justify-center text-white/40';
+                      fallback.innerHTML = `
+                        <div class="text-center p-4">
+                          <svg class="w-16 h-16 mx-auto mb-3 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+                          </svg>
+                          <div class="text-sm font-medium">Фото завода</div>
+                          <div class="text-xs text-white/30 mt-1">Положите фото в /public/images/about/factory.jpg</div>
+                        </div>
+                      `;
+                      parent.appendChild(fallback);
+                    }
+                  }}
+                />
+                <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur rounded-[8px] p-4 flex gap-3 items-center">
+                  <div className="w-12 h-12 rounded-[8px] bg-[#212832] grid place-items-center text-white font-black text-[18px]">Б</div>
+                  <div>
+                    <div className="text-[13px] font-bold leading-tight">Завод в п. Щеглово, Всеволожский р-н</div>
+                    <div className="text-[12px] text-gray-500">Отгрузка 6 дней в неделю, 8:00-19:00</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="absolute -bottom-6 -right-6 w-[140px] h-[140px] rounded-full bg-[#EF6D12] blur-[40px] opacity-40" />
+          </div>
         </div>
-      </div>
-      <div className="absolute -bottom-6 -right-6 w-[140px] h-[140px] rounded-full bg-[#EF6D12] blur-[40px] opacity-40" />
-    </div>
-  </div>
-</section>
+      </section>
 
       {/* Services compact */}
       <section className="bg-[#F5F7FA] py-10 lg:py-14">
@@ -768,58 +772,57 @@ export default function App() {
       </section>
 
       {/* Contacts */}
-<section id="contacts" className="bg-white py-10 lg:py-16 border-t">
-  <div className="mx-auto max-w-[1440px] px-4 lg:px-8 grid lg:grid-cols-[1fr_440px] gap-10">
-    <div>
-      <h2 className="text-[24px] lg:text-[32px] font-black tracking-[-0.02em] leading-[1.1]">Приезжайте в наш офис<br />в Санкт-Петербурге</h2>
-      <div className="mt-8 grid sm:grid-cols-2 gap-8 max-w-[620px]">
-        <div>
-          <div className="text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">Адрес офиса</div>
-          <div className="text-[15px] font-medium leading-[1.4]">Санкт-Петербург,<br />Старообрядческая ул., 24<br/><span className="text-gray-500 text-[13px]">м. Московские ворота</span></div>
-        </div>
-        <div>
-          <div className="text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">Телефон и почта</div>
-          <a href="tel:+79673448484" className="block text-[18px] font-bold">+7 (967) 344-84-84</a>
-          <a href="mailto:info@bioplit.ru" className="text-[14px] text-[#EF6D12] font-medium">info@bioplit.ru</a>
-          <div className="text-[13px] text-gray-500 mt-1">Пн-Сб 9:00-19:00, Вс - по записи</div>
-        </div>
-      </div>
+      <section id="contacts" className="bg-white py-10 lg:py-16 border-t">
+        <div className="mx-auto max-w-[1440px] px-4 lg:px-8 grid lg:grid-cols-[1fr_440px] gap-10">
+          <div>
+            <h2 className="text-[24px] lg:text-[32px] font-black tracking-[-0.02em] leading-[1.1]">Приезжайте в наш офис<br />в Санкт-Петербурге</h2>
+            <div className="mt-8 grid sm:grid-cols-2 gap-8 max-w-[620px]">
+              <div>
+                <div className="text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">Адрес офиса</div>
+                <div className="text-[15px] font-medium leading-[1.4]">Санкт-Петербург,<br />Старообрядческая ул., 24<br/><span className="text-gray-500 text-[13px]">м. Московские ворота</span></div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">Телефон и почта</div>
+                <a href="tel:+79673448484" className="block text-[18px] font-bold">+7 (967) 344-84-84</a>
+                <a href="mailto:info@bioplit.ru" className="text-[14px] text-[#EF6D12] font-medium">info@bioplit.ru</a>
+                <div className="text-[13px] text-gray-500 mt-1">Пн-Сб 9:00-19:00, Вс - по записи</div>
+              </div>
+            </div>
 
-      {/* КАРТА — ваша */}
-      <div className="mt-8 rounded-[12px] overflow-hidden bg-[#F1F4F8] aspect-[16/9] lg:aspect-[2/1] relative border border-gray-100">
-        <iframe
-          src="https://yandex.ru/map-widget/v1/?ll=30.299339%2C59.888013&z=16.25&pt=30.299339%2C59.888013%2Cflag&whatshere%5Bpoint%5D=30.299339%2C59.888013&whatshere%5Bzoom%5D=17"
-          className="w-full h-full"
-          frameBorder="0"
-          allowFullScreen
-          title="Карта проезда — Старообрядческая ул., 24, Санкт-Петербург"
-        />
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#212832] text-white px-4 py-2 rounded-full text-[13px] font-semibold flex items-center gap-2 shadow-xl whitespace-nowrap">
-          <span className="w-2 h-2 bg-[#EF6D12] rounded-full animate-pulse block" />
-          Мы здесь — Старообрядческая ул., 24
-        </div>
-      </div>
-    </div>
+            {/* Карта */}
+            <div className="mt-8 rounded-[12px] overflow-hidden bg-[#F1F4F8] aspect-[16/9] lg:aspect-[2/1] relative border border-gray-100">
+              <iframe
+                src="https://yandex.ru/map-widget/v1/?ll=30.299339%2C59.888013&z=16.25&pt=30.299339%2C59.888013%2Cflag"
+                className="w-full h-full"
+                frameBorder="0"
+                allowFullScreen
+                title="Карта проезда — Старообрядческая ул., 24, Санкт-Петербург"
+              />
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#212832] text-white px-4 py-2 rounded-full text-[13px] font-semibold flex items-center gap-2 shadow-xl whitespace-nowrap">
+                <span className="w-2 h-2 bg-[#EF6D12] rounded-full animate-pulse block" />
+                Мы здесь — Старообрядческая ул., 24
+              </div>
+            </div>
+          </div>
 
-    {/* Форма */}
-    <div className="bg-[#F7F9FB] rounded-[12px] p-6 lg:p-7 border border-gray-100 h-fit">
-      <div className="text-[18px] font-bold leading-tight">Рассчитаем смету за 1 час</div>
-      <div className="text-[13px] text-[#5A667A] mt-1">Бесплатно, без спама. Инженер перезвонит.</div>
-      <form onSubmit={(e)=>{ e.preventDefault(); setToast('Заявка отправлена! Перезвоним в течение 15 минут.'); (e.target as HTMLFormElement).reset(); }} className="mt-6 space-y-3">
-        <input required placeholder="Ваше имя" className="w-full h-[44px] px-4 rounded-[4px] border border-gray-200 bg-white text-[14px] outline-none focus:border-[#EF6D12] focus:ring-2 focus:ring-[#EF6D12]/20" />
-        <input required placeholder="+7 (___) ___-__-__" type="tel" className="w-full h-[44px] px-4 rounded-[4px] border border-gray-200 bg-white text-[14px] outline-none focus:border-[#EF6D12] focus:ring-2 focus:ring-[#EF6D12]/20" />
-        <select className="w-full h-[44px] px-4 rounded-[4px] border border-gray-200 bg-white text-[14px] outline-none focus:border-[#EF6D12]">
-          <option>Что интересует?</option>
-          <option>Фасадная плитка</option>
-          <option>Брусчатка</option>
-          <option>Монтаж под ключ</option>
-        </select>
-        <button type="submit" className="w-full h-[46px] bg-[#EF6D12] hover:bg-[#E0610A] text-white font-semibold rounded-[4px] text-[14px] transition">Получить расчет</button>
-        <div className="text-[11px] text-gray-400 leading-[1.3] text-center">Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности</div>
-      </form>
-    </div>
-  </div>
-</section>
+          <div className="bg-[#F7F9FB] rounded-[12px] p-6 lg:p-7 border border-gray-100 h-fit">
+            <div className="text-[18px] font-bold leading-tight">Рассчитаем смету за 1 час</div>
+            <div className="text-[13px] text-[#5A667A] mt-1">Бесплатно, без спама. Инженер перезвонит.</div>
+            <form onSubmit={(e)=>{ e.preventDefault(); setToast('Заявка отправлена! Перезвоним в течение 15 минут.'); (e.target as HTMLFormElement).reset(); }} className="mt-6 space-y-3">
+              <input required placeholder="Ваше имя" className="w-full h-[44px] px-4 rounded-[4px] border border-gray-200 bg-white text-[14px] outline-none focus:border-[#EF6D12] focus:ring-2 focus:ring-[#EF6D12]/20" />
+              <input required placeholder="+7 (___) ___-__-__" type="tel" className="w-full h-[44px] px-4 rounded-[4px] border border-gray-200 bg-white text-[14px] outline-none focus:border-[#EF6D12] focus:ring-2 focus:ring-[#EF6D12]/20" />
+              <select className="w-full h-[44px] px-4 rounded-[4px] border border-gray-200 bg-white text-[14px] outline-none focus:border-[#EF6D12]">
+                <option>Что интересует?</option>
+                <option>Фасадная плитка</option>
+                <option>Брусчатка</option>
+                <option>Монтаж под ключ</option>
+              </select>
+              <button type="submit" className="w-full h-[46px] bg-[#EF6D12] hover:bg-[#E0610A] text-white font-semibold rounded-[4px] text-[14px] transition">Получить расчет</button>
+              <div className="text-[11px] text-gray-400 leading-[1.3] text-center">Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности</div>
+            </form>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="bg-[#212832] text-white/80 pt-10 pb-8">
