@@ -496,7 +496,7 @@ export default function App() {
             {/* Видео-презентация */}
             <div className="mt-8 relative rounded-[12px] overflow-hidden bg-[#1B222E] aspect-video max-w-[900px]">
               <Player
-                src="https://rutube.ru/play/embed/2bb783d89c63eac106018c32466b6159/"
+                url="https://rutube.ru/play/embed/2bb783d89c63eac106018c32466b6159/"
                 className="w-full h-full"
               />
             </div>
@@ -559,7 +559,7 @@ export default function App() {
             <div className="aspect-[16/9] bg-[#1B222E]">
               {selectedWork.video ? (
                 <Player
-                  src={selectedWork.video}
+                  url={selectedWork.video}
                   className="w-full h-full"
                 />
               ) : (
