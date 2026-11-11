@@ -156,3 +156,28 @@ export async function updateAccountPassword(session: AdminSession, password: str
     body: JSON.stringify({ password }),
   }, session);
 }
+
+
+export async function sendPasswordReset(email: string) {
+  const { url, key } = config();
+  const response = await fetch(`${url}/auth/v1/recover`, {
+    method: 'POST',
+    headers: { apikey: key, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, redirect_to: `${window.location.origin}/admin` }),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({})) as Record<string, unknown>;
+    throw new Error(String(data.msg || data.message || 'Не удалось отправить письмо для сброса пароля'));
+  }
+}
+
+export function saveRecoverySession(session: AdminSession) {
+  saveSession(session);
+}
+
+export async function updateAccountPassword(session: AdminSession, password: string) {
+  await request('/auth/v1/user', {
+    method: 'PUT',
+    body: JSON.stringify({ password }),
+  }, session);
+}
