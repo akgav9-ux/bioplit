@@ -170,8 +170,8 @@ export default function App() {
   }, []);
 
   const sitePhone = siteSettings.phone || '+79668591206';
-  const sitePhoneDisplay = siteSettings.phone_display || '{sitePhoneDisplay}';
-  const siteEmail = siteSettings.email || '{siteEmail}';
+  const sitePhoneDisplay = siteSettings.phone_display || '+7 (966) 859-12-06';
+  const siteEmail = siteSettings.email || 'info@bioplit.ru';
 
   const scrollTo = (id: string) => {
     setMobileOpen(false);
