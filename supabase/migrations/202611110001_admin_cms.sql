@@ -83,6 +83,7 @@ create table if not exists public.site_settings (
   key text not null unique,
   label text,
   value text,
+  is_active boolean not null default true,
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -150,3 +151,33 @@ begin
     execute format('create trigger set_updated_at before update on public.%I for each row execute function public.set_updated_at()', t);
   end loop;
 end $$;
+
+-- Переносим исходные карточки сайта в CMS, чтобы первый добавленный элемент
+-- не заменил весь существующий каталог или список работ.
+insert into public.catalog_items (title, title_short, category, image_url, sort_order, is_active)
+select v.title, v.title_short, v.category, v.image_url, v.sort_order, true
+from (values
+  ('ФАСАДНАЯ ПЛИТКА И КАМЕНЬ','Фасадная плитка и камень','facade','/images/catalog/facade/1.jpg',1),
+  ('ЦОКОЛЬНЫЕ ПАНЕЛИ','Цокольные панели','cokol','/images/catalog/cokol/1.jpg',2),
+  ('БРУСЧАТКА И ТРОТУАРНАЯ ПЛИТКА','Брусчатка и тротуарная плитка','brus','/images/catalog/brus/1.jpg',3),
+  ('ТАКТИЛЬНАЯ ПЛИТКА','Тактильная плитка','tactile','/images/catalog/tactile/1.jpg',4),
+  ('БОРДЮРЫ И ВОДОСТОКИ','Бордюры и водостоки','bord','/images/catalog/bord/1.jpg',5),
+  ('ЦВЕТОЧНЫЕ ВАЗОНЫ','Цветочные вазоны','vazon','/images/catalog/vazon/1.jpg',6)
+) as v(title,title_short,category,image_url,sort_order)
+where not exists (select 1 from public.catalog_items c where c.category = v.category);
+
+insert into public.works (title, category, description, image_url, video_url, year, location, sort_order, is_active)
+select 'Проект #' || n, 'Наши работы', 'Описание проекта', '/images/works/work' || n || '.jpg',
+       case when n = 1 then 'https://rutube.ru/play/embed/2bb783d89c63eac106018c32466b6159/' else null end,
+       '2025', 'СПб', n, true
+from generate_series(1,20) as n
+where not exists (select 1 from public.works w where w.title = 'Проект #' || n);
+
+insert into public.services (title, description, sort_order, is_active)
+select v.title, v.description, v.sort_order, true
+from (values
+  ('Монтаж фасада под ключ','Подсистема, утеплитель, плитка, затирка. Бригада 4 чел, от 80 м² за 5 дней.',1),
+  ('Укладка брусчатки','Подготовка основания, геотекстиль, вибротрамбовка. Гарантия на просадку 2 года.',2),
+  ('Бесплатный замер и 3D-визуализация','Выезд инженера по СПб бесплатно, покажем как будет выглядеть ваш дом.',3)
+) as v(title,description,sort_order)
+where not exists (select 1 from public.services s where s.title = v.title);
