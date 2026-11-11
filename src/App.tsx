@@ -242,8 +242,8 @@ export default function App() {
 
   const closeProduct = () => {
     setLightboxOpen(false);
-    if (window.location.pathname.startsWith('/product/')) window.history.back();
-    else setSelectedProduct(null);
+    if (window.location.pathname.startsWith('/product/') && window.history.state?.productId) window.history.back();
+    else { window.history.replaceState({}, '', '/'); setSelectedProduct(null); }
   };
 
   useEffect(() => {
@@ -439,7 +439,7 @@ export default function App() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
                 {selectedCategory.images.map((img, i) => (
-                  <div key={i} onClick={() => openProduct({ ...selectedCategory, id: `${selectedCategory.id}-${i}`, titleShort: selectedCategory.titleShort || `Модель #${i + 1}`, image: img })} role="button" tabIndex={0} className="group bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100 cursor-pointer hover:shadow-lg transition">
+                  <div key={i} onClick={() => openProduct({ ...selectedCategory, id: selectedCategory.id, titleShort: selectedCategory.titleShort || `Модель #${i + 1}`, image: img, images: [img] })} role="button" tabIndex={0} className="group bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100 cursor-pointer hover:shadow-lg transition">
                     <div className="aspect-[4/3] overflow-hidden bg-[#E8ECF0]">
                       <img src={img} alt={`${selectedCategory.titleShort} ${i + 1}`} className="w-full h-full object-cover" onError={(e) => handleImageError(e, selectedCategory.fallback)} />
                     </div>
@@ -476,7 +476,7 @@ export default function App() {
               <div className="mt-5 text-2xl font-black text-[#EF6D12]">{selectedProduct.price ? `${Number(selectedProduct.price).toLocaleString('ru-RU')} ₽${selectedProduct.unit ? ` / ${selectedProduct.unit}` : ''}` : 'Цена уточняется'}</div>
               <section className="mt-7"><h2 className="text-lg font-bold">Описание</h2><p className="mt-2 text-[15px] leading-7 text-slate-600 whitespace-pre-line">{selectedProduct.description || 'Описание товара пока не добавлено.'}</p></section>
               <section className="mt-7"><h2 className="text-lg font-bold">Размеры и характеристики</h2><div className="mt-3 divide-y rounded-xl border border-slate-200">
-                {([['Ширина',selectedProduct.width],['Длина',selectedProduct.length],['Толщина',selectedProduct.thickness]] as Array<[string,string|undefined]>).map(([label,value])=><div key={label} className="flex justify-between gap-4 px-4 py-3 text-sm"><span className="text-slate-500">{label}</span><strong>{value || 'Не указано'}</strong></div>)}
+                {([['Ширина, мм',selectedProduct.width],['Длина, мм',selectedProduct.length],['Толщина, мм',selectedProduct.thickness]] as Array<[string,string|undefined]>).map(([label,value])=><div key={label} className="flex justify-between gap-4 px-4 py-3 text-sm"><span className="text-slate-500">{label}</span><strong>{value || 'Не указано'}</strong></div>)}
               </div></section>
               <a href={`tel:${sitePhone}`} className="mt-8 inline-flex rounded-lg bg-[#EF6D12] px-6 py-4 font-bold text-white">Уточнить наличие и заказать</a>
             </div>
