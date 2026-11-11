@@ -12,6 +12,10 @@
     {
       "source": "/admin/:path*",
       "destination": "/"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/"
     }
   ]
 }
