@@ -120,6 +120,7 @@ export default function App() {
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(defaultCatalog);
   const [workItems, setWorkItems] = useState<WorkItem[]>(defaultWorksData);
   const [priceItems, setPriceItems] = useState<Array<{ id: string; title: string; category: string; price: string; unit: string; description: string }>>([]);
+  const [siteSettings, setSiteSettings] = useState<Record<string, string>>({});
   const [serviceItems, setServiceItems] = useState([
     { n: '01', t: 'Монтаж фасада под ключ', d: 'Подсистема, утеплитель, плитка, затирка. Бригада 4 чел, от 80 м² за 5 дней.' },
     { n: '02', t: 'Укладка брусчатки', d: 'Подготовка основания, геотекстиль, вибротрамбовка. Гарантия на просадку 2 года.' },
@@ -132,8 +133,8 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([publicRows('catalog_items'), publicRows('works'), publicRows('services'), publicRows('price_items')])
-      .then(([catalogRows, workRows, serviceRows, priceRows]) => {
+    Promise.all([publicRows('catalog_items'), publicRows('works'), publicRows('services'), publicRows('price_items'), publicRows('site_settings')])
+      .then(([catalogRows, workRows, serviceRows, priceRows, settingRows]) => {
         if (!active) return;
         if (catalogRows.length) setCatalogItems(catalogRows.map((row, index) => ({
           id: String(row.id || row.category || index),
@@ -155,6 +156,7 @@ export default function App() {
           year: String(row.year || ''),
           location: String(row.location || ''),
         })));
+        if (settingRows.length) setSiteSettings(Object.fromEntries(settingRows.map(row => [String(row.key || ''), String(row.value || '')])));
         if (priceRows.length) setPriceItems(priceRows.map((row, index) => ({ id: String(row.id || index), title: String(row.title || ''), category: String(row.category || ''), price: String(row.price ?? ''), unit: String(row.unit || ''), description: String(row.description || '') })));
         if (serviceRows.length) setServiceItems(serviceRows.map((row, index) => ({
           n: String(index + 1).padStart(2, '0'),
@@ -166,6 +168,10 @@ export default function App() {
       });
     return () => { active = false; };
   }, []);
+
+  const sitePhone = siteSettings.phone || '+79668591206';
+  const sitePhoneDisplay = siteSettings.phone_display || '{sitePhoneDisplay}';
+  const siteEmail = siteSettings.email || '{siteEmail}';
 
   const scrollTo = (id: string) => {
     setMobileOpen(false);
@@ -270,9 +276,9 @@ export default function App() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <a href="tel:+79668591206" className="hidden md:flex text-[16px] font-semibold tracking-[-0.01em] hover:text-[#EF6D12] transition">+7 (966) 859-12-06</a>
+            <a href={`tel:${sitePhone}`} className="hidden md:flex text-[16px] font-semibold tracking-[-0.01em] hover:text-[#EF6D12] transition">{sitePhoneDisplay}</a>
             
-            <a href="tel:+79668591206" className="lg:hidden w-9 h-9 grid place-items-center rounded-full bg-white/10">
+            <a href={`tel:${sitePhone}`} className="lg:hidden w-9 h-9 grid place-items-center rounded-full bg-white/10">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6.6 4.6c-.4-.4-.9-.6-1.5-.5L3.7 4.3c-1 .2-1.6 1.3-1.2 2.3C4.2 11.2 7.8 14.8 12.4 16.5c1 .4 2.1-.2 2.3-1.2l.2-1.4c.1-.6-.1-1.1-.5-1.5l-1.8-1.8c-.4-.4-1-.5-1.5-.3l-.9.3c-.5.2-1.1.1-1.5-.3l-1.3-1.3c-.4-.4-.5-1-.3-1.5l.3-.9c.2-.5 0-1.1-.3-1.5L6.6 4.6Z" stroke="#EF6D12" strokeWidth="1.4" strokeLinejoin="round"/></svg>
             </a>
           </div>
@@ -301,7 +307,7 @@ export default function App() {
                 <button onClick={()=>scrollTo('contacts')} className="block text-[16px] font-medium">Контакты</button>
                 <div className="pt-4">
                   <div className="text-[13px] text-gray-500">Позвоните нам</div>
-                  <a href="tel:+79668591206" className="text-[18px] font-bold">+7 (966) 859-12-06</a>
+                  <a href={`tel:${sitePhone}`} className="text-[18px] font-bold">{sitePhoneDisplay}</a>
                 </div>
                 
               </div>
@@ -322,7 +328,7 @@ export default function App() {
                 Назад в каталог
               </button>
               <div className="text-[16px] font-bold text-[#EF6D12]">{selectedCategory.titleShort}</div>
-              <a href="tel:+79668591206" className="text-[14px] font-semibold hover:text-[#EF6D12] transition">+7 (966) 859-12-06</a>
+              <a href={`tel:${sitePhone}`} className="text-[14px] font-semibold hover:text-[#EF6D12] transition">{sitePhoneDisplay}</a>
             </div>
           </div>
 
@@ -353,7 +359,7 @@ export default function App() {
               ))}
             </div>
 
-            <div className="mt-10 text-center"><a href="tel:+79668591206" className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить и уточнить наличие</a><p className="text-[13px] text-gray-400 mt-3">Поможем с выбором и ответим на вопросы</p></div>
+            <div className="mt-10 text-center"><a href={`tel:${sitePhone}`} className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить и уточнить наличие</a><p className="text-[13px] text-gray-400 mt-3">Поможем с выбором и ответим на вопросы</p></div>
           </div>
         </div>
       )}
@@ -530,7 +536,7 @@ export default function App() {
                 Назад
               </button>
               <div className="text-[16px] font-bold text-[#EF6D12]">Все работы</div>
-              <a href="tel:+79668591206" className="text-[14px] font-semibold hover:text-[#EF6D12] transition">+7 (966) 859-12-06</a>
+              <a href={`tel:${sitePhone}`} className="text-[14px] font-semibold hover:text-[#EF6D12] transition">{sitePhoneDisplay}</a>
             </div>
           </div>
 
@@ -586,7 +592,7 @@ export default function App() {
             </div>
 
 
-            <div className="mt-10 text-center"><a href="tel:+79668591206" className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить по вопросу проекта</a></div>
+            <div className="mt-10 text-center"><a href={`tel:${sitePhone}`} className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить по вопросу проекта</a></div>
           </div>
         </div>
       )}
@@ -760,8 +766,8 @@ export default function App() {
               </div>
               <div>
                 <div className="text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">Телефон и почта</div>
-                <a href="tel:+79668591206" className="block text-[18px] font-bold">+7 (966) 859-12-06</a>
-                <a href="mailto:info@bioplit.ru" className="text-[14px] text-[#EF6D12] font-medium">info@bioplit.ru</a>
+                <a href={`tel:${sitePhone}`} className="block text-[18px] font-bold">{sitePhoneDisplay}</a>
+                <a href={`mailto:${siteEmail}`} className="text-[14px] text-[#EF6D12] font-medium">{siteEmail}</a>
                 <div className="text-[13px] text-gray-500 mt-1">Пн-Сб 9:00-19:00, Вс - по записи</div>
               </div>
             </div>
@@ -782,7 +788,7 @@ export default function App() {
             </div>
           </div>
 
-          <aside className="bg-[#F7F9FB] rounded-[12px] p-6 lg:p-7 border border-gray-100 h-fit"><div className="text-[18px] font-bold leading-tight">Свяжитесь с нами напрямую</div><p className="text-[13px] text-[#5A667A] mt-2">Позвоните или напишите нам — ответим на вопросы о продукции, наличии и доставке.</p><a href="tel:+79668591206" className="mt-5 flex items-center justify-center min-h-[48px] px-5 bg-[#EF6D12] text-white font-semibold rounded-[4px] text-[14px]">+7 (966) 859-12-06</a><a href="mailto:info@bioplit.ru" className="mt-3 block text-center text-[14px] font-semibold text-[#EF6D12]">info@bioplit.ru</a><p className="mt-5 text-[12px] text-gray-500">Санкт-Петербург и Ленинградская область</p></aside>
+          <aside className="bg-[#F7F9FB] rounded-[12px] p-6 lg:p-7 border border-gray-100 h-fit"><div className="text-[18px] font-bold leading-tight">Свяжитесь с нами напрямую</div><p className="text-[13px] text-[#5A667A] mt-2">Позвоните или напишите нам — ответим на вопросы о продукции, наличии и доставке.</p><a href={`tel:${sitePhone}`} className="mt-5 flex items-center justify-center min-h-[48px] px-5 bg-[#EF6D12] text-white font-semibold rounded-[4px] text-[14px]">{sitePhoneDisplay}</a><a href={`mailto:${siteEmail}`} className="mt-3 block text-center text-[14px] font-semibold text-[#EF6D12]">{siteEmail}</a><p className="mt-5 text-[12px] text-gray-500">Санкт-Петербург и Ленинградская область</p></aside>
         </div>
       </section>
 
@@ -818,7 +824,7 @@ export default function App() {
               </div>
               <div className="col-span-2 lg:col-span-1">
                 <div className="font-bold text-white mb-3">Связаться</div>
-                <a href="tel:+79668591206" className="text-[18px] font-bold text-white block">+7 (966) 859-12-06</a>
+                <a href={`tel:${sitePhone}`} className="text-[18px] font-bold text-white block">{sitePhoneDisplay}</a>
                 
                 <div className="mt-4 text-[12px] opacity-50">п. Щеглово, Заводская 12<br/>ИНН 7806543210 • ОГРН 1147847273821</div>
               </div>
