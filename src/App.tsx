@@ -70,9 +70,9 @@ const defaultCatalog: CatalogItem[] = [
     categoryKey: 'brus',
     title: 'БРУСЧАТКА И ТРОТУАРНАЯ ПЛИТКА',
     titleShort: 'Брусчатка и тротуарная плитка',
-    image: '/images/catalog/brus/1.jpg',
+    image: 'https://ymvpcxfwozymujhovdwk.supabase.co/storage/v1/object/public/site-media/IMG_20261111_215004_136.jpg',
     fallback: FALLBACK_SVG,
-    images: getCategoryImages('brus', 1),
+    images: ['https://ymvpcxfwozymujhovdwk.supabase.co/storage/v1/object/public/site-media/IMG_20261111_215004_136.jpg'],
   },
   {
     id: 'large-format',
@@ -193,8 +193,8 @@ export default function App() {
               id: 'large-format', categoryKey: 'large-format',
               title: 'КРУПНОФОРМАТНАЯ ТРОТУАРНАЯ ПЛИТКА',
               titleShort: 'Крупноформатная тротуарная плитка',
-              image: '/images/catalog/brus/1.jpg', fallback: FALLBACK_SVG,
-              images: getCategoryImages('brus', 1),
+              image: 'https://ymvpcxfwozymujhovdwk.supabase.co/storage/v1/object/public/site-media/IMG_20261111_215004_136.jpg', fallback: FALLBACK_SVG,
+              images: ['https://ymvpcxfwozymujhovdwk.supabase.co/storage/v1/object/public/site-media/IMG_20261111_215004_136.jpg'],
             });
           }
           setCatalogItems(loadedCategories);
