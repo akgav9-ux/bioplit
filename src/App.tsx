@@ -75,6 +75,15 @@ const defaultCatalog: CatalogItem[] = [
     images: getCategoryImages('brus', 1),
   },
   {
+    id: 'large-format',
+    categoryKey: 'large-format',
+    title: 'КРУПНОФОРМАТНАЯ ТРОТУАРНАЯ ПЛИТКА',
+    titleShort: 'Крупноформатная тротуарная плитка',
+    image: '/images/catalog/brus/1.jpg',
+    fallback: FALLBACK_SVG,
+    images: getCategoryImages('brus', 1),
+  },
+  {
     id: 'tactile',
     categoryKey: 'tactile',
     title: 'ТАКТИЛЬНАЯ ПЛИТКА',
@@ -165,19 +174,31 @@ export default function App() {
     Promise.all([publicRows('catalog_items'), publicRows('catalog_products'), publicRows('works'), publicRows('services'), publicRows('price_items'), publicRows('site_settings')])
       .then(([catalogRows, productRows, workRows, serviceRows, priceRows, settingRows]) => {
         if (!active) return;
-        if (catalogRows.length) setCatalogItems(catalogRows.map((row, index) => ({
-          id: String(row.id || row.category || index),
-          title: String(row.title || ''),
-          titleShort: String(row.title_short || row.title || ''),
-          categoryKey: String(row.category || ''),
-          image: String(row.image_url || FALLBACK_SVG),
-          fallback: FALLBACK_SVG,
-          images: Array.isArray(row.images) ? row.images.map(String).slice(0, 5) : row.image_url ? [String(row.image_url)] : [],
-          description: String(row.description || ''),
-          price: String(row.price ?? ''),
-          unit: String(row.unit || ''),
-          width: String(row.width ?? ''), length: String(row.length ?? ''), thickness: String(row.thickness ?? ''),
-        })));
+        if (catalogRows.length) {
+          const loadedCategories = catalogRows.map((row, index) => ({
+            id: String(row.id || row.category || index),
+            title: String(row.title || ''),
+            titleShort: String(row.title_short || row.title || ''),
+            categoryKey: String(row.category || ''),
+            image: String(row.image_url || FALLBACK_SVG),
+            fallback: FALLBACK_SVG,
+            images: Array.isArray(row.images) ? row.images.map(String).slice(0, 5) : row.image_url ? [String(row.image_url)] : [],
+            description: String(row.description || ''),
+            price: String(row.price ?? ''),
+            unit: String(row.unit || ''),
+            width: String(row.width ?? ''), length: String(row.length ?? ''), thickness: String(row.thickness ?? ''),
+          }));
+          if (!loadedCategories.some(item => item.categoryKey === 'large-format')) {
+            loadedCategories.push({
+              id: 'large-format', categoryKey: 'large-format',
+              title: 'КРУПНОФОРМАТНАЯ ТРОТУАРНАЯ ПЛИТКА',
+              titleShort: 'Крупноформатная тротуарная плитка',
+              image: '/images/catalog/brus/1.jpg', fallback: FALLBACK_SVG,
+              images: getCategoryImages('brus', 1),
+            });
+          }
+          setCatalogItems(loadedCategories);
+        }
         if (productRows.length) setCatalogProducts(productRows.map((row, index) => ({
           id: String(row.id || index),
           title: String(row.title || ''),
