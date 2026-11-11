@@ -164,9 +164,7 @@ export default function App() {
       }).catch(() => {
         // Keep the existing static content until the CMS has been configured.
       });
-    if (window.location.pathname.replace(/\/+$/, '') === '/admin') return <AdminPanel />;
-
-  return () => { active = false; };
+    return () => { active = false; };
   }, []);
 
   const scrollTo = (id: string) => {
@@ -189,6 +187,8 @@ export default function App() {
       img.src = fallback;
     }
   };
+
+  if (window.location.pathname.replace(/\/+$/, '') === '/admin') return <AdminPanel />;
 
   return (
     <div className="min-h-screen bg-white text-[#1B222E] antialiased selection:bg-[#FF6B00] selection:text-white">
@@ -483,7 +483,7 @@ export default function App() {
             </button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
-            {worksData.slice(0, 5).map((w) => (
+            {workItems.slice(0, 5).map((w) => (
               <div 
                 key={w.id} 
                 onClick={() => setSelectedWork(w)} 
