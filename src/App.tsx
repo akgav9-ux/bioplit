@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Player } from '@barabel324/react-player';
 import '@barabel324/react-player/css';
 
@@ -41,7 +41,7 @@ const catalog: CatalogItem[] = [
     titleShort: 'Фасадная плитка и камень',
     image: '/images/catalog/facade/1.jpg',
     fallback: FALLBACK_SVG,
-    images: getCategoryImages('facade', 12),
+    images: getCategoryImages('facade', 2),
   },
   {
     id: 'cokol',
@@ -49,7 +49,7 @@ const catalog: CatalogItem[] = [
     titleShort: 'Цокольные панели',
     image: '/images/catalog/cokol/1.jpg',
     fallback: FALLBACK_SVG,
-    images: getCategoryImages('cokol', 12),
+    images: getCategoryImages('cokol', 1),
   },
   {
     id: 'brus',
@@ -57,7 +57,7 @@ const catalog: CatalogItem[] = [
     titleShort: 'Брусчатка и тротуарная плитка',
     image: '/images/catalog/brus/1.jpg',
     fallback: FALLBACK_SVG,
-    images: getCategoryImages('brus', 12),
+    images: getCategoryImages('brus', 1),
   },
   {
     id: 'tactile',
@@ -65,7 +65,7 @@ const catalog: CatalogItem[] = [
     titleShort: 'Тактильная плитка',
     image: '/images/catalog/tactile/1.jpg',
     fallback: FALLBACK_SVG,
-    images: getCategoryImages('tactile', 12),
+    images: getCategoryImages('tactile', 1),
   },
   {
     id: 'bord',
@@ -73,7 +73,7 @@ const catalog: CatalogItem[] = [
     titleShort: 'Бордюры и водостоки',
     image: '/images/catalog/bord/1.jpg',
     fallback: FALLBACK_SVG,
-    images: getCategoryImages('bord', 12),
+    images: getCategoryImages('bord', 1),
   },
   {
     id: 'vazon',
@@ -81,7 +81,7 @@ const catalog: CatalogItem[] = [
     titleShort: 'Цветочные вазоны',
     image: '/images/catalog/vazon/1.jpg',
     fallback: FALLBACK_SVG,
-    images: getCategoryImages('vazon', 12),
+    images: getCategoryImages('vazon', 1),
   },
 ];
 
@@ -115,20 +115,10 @@ const worksData: WorkItem[] = worksImages.map((img, index) => ({
 
 export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [callbackOpen, setCallbackOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CatalogItem | null>(null);
   const [showAllWorks, setShowAllWorks] = useState(false);
   const [selectedWork, setSelectedWork] = useState<WorkItem | null>(null);
-  const [workFilter, setWorkFilter] = useState<string>('all');
-
-  useEffect(() => {
-    if (toast) {
-      const t = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(t);
-    }
-  }, [toast]);
 
   const scrollTo = (id: string) => {
     setMobileOpen(false);
@@ -167,7 +157,7 @@ export default function App() {
 
             <a href="#" className="flex items-center gap-3">
               <div className="w-[48px] h-[42px] relative shrink-0">
-                <img src="/images/logo-mark.png" alt="" className="w-full h-full object-contain mix-blend-normal brightness-[1.1]" onError={(e) => ((e.target as HTMLImageElement).style.display='none')} />
+                <img src="/images/logo-mark.jpg" alt="" className="w-full h-full object-contain mix-blend-normal brightness-[1.1]" onError={(e) => ((e.target as HTMLImageElement).style.display='none')} />
                 <svg viewBox="0 0 88 72" className="absolute inset-0 w-full h-full">
                   <path d="M12 18 L44 2 L44 20 L12 36 Z" fill="#3C424D" />
                   <path d="M44 2 L80 18 L66 24 L66 40 L52 34 L52 18 L44 20 Z" fill="#EF6D12" />
@@ -232,9 +222,7 @@ export default function App() {
 
           <div className="flex items-center gap-4">
             <a href="tel:+79673448484" className="hidden md:flex text-[16px] font-semibold tracking-[-0.01em] hover:text-[#EF6D12] transition">+7 (967) 344-84-84</a>
-            <button onClick={()=>setCallbackOpen(true)} className="hidden sm:inline-flex bg-[#EF6D12] hover:bg-[#E1620C] text-white text-[13px] font-semibold px-4 h-[36px] items-center rounded-[4px] transition">
-              Заказать звонок
-            </button>
+            
             <a href="tel:+79673448484" className="lg:hidden w-9 h-9 grid place-items-center rounded-full bg-white/10">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6.6 4.6c-.4-.4-.9-.6-1.5-.5L3.7 4.3c-1 .2-1.6 1.3-1.2 2.3C4.2 11.2 7.8 14.8 12.4 16.5c1 .4 2.1-.2 2.3-1.2l.2-1.4c.1-.6-.1-1.1-.5-1.5l-1.8-1.8c-.4-.4-1-.5-1.5-.3l-.9.3c-.5.2-1.1.1-1.5-.3l-1.3-1.3c-.4-.4-.5-1-.3-1.5l.3-.9c.2-.5 0-1.1-.3-1.5L6.6 4.6Z" stroke="#EF6D12" strokeWidth="1.4" strokeLinejoin="round"/></svg>
             </a>
@@ -266,7 +254,7 @@ export default function App() {
                   <div className="text-[13px] text-gray-500">Позвоните нам</div>
                   <a href="tel:+79673448484" className="text-[18px] font-bold">+7 (967) 344-84-84</a>
                 </div>
-                <button onClick={()=>{ setMobileOpen(false); setCallbackOpen(true);}} className="w-full mt-2 bg-[#EF6D12] text-white h-[44px] rounded font-semibold">Заказать звонок</button>
+                
               </div>
             </div>
           </div>
@@ -316,18 +304,7 @@ export default function App() {
               ))}
             </div>
 
-            <div className="mt-10 text-center">
-              <button
-                onClick={() => {
-                  closeCategory();
-                  setCallbackOpen(true);
-                }}
-                className="h-[52px] px-8 bg-[#EF6D12] hover:bg-[#E0610A] text-white font-semibold rounded-[6px] transition shadow-[0_8px_20px_rgba(239,109,18,.25)]"
-              >
-                Заказать {selectedCategory.titleShort.toLowerCase()}
-              </button>
-              <p className="text-[13px] text-gray-400 mt-3">Перезвоним за 5 минут, поможем с выбором</p>
-            </div>
+            <div className="mt-10 text-center"><a href="tel:+79673448484" className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить и уточнить наличие</a><p className="text-[13px] text-gray-400 mt-3">Поможем с выбором и ответим на вопросы</p></div>
           </div>
         </div>
       )}
@@ -410,12 +387,7 @@ export default function App() {
       {/* Catalog */}
       <section id="catalog" className="bg-[#FBFCFD] py-8 lg:py-10">
         <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
-          <div className="flex items-center justify-between mb-5 lg:hidden">
-            <h2 className="text-[18px] font-bold">Каталог продукции</h2>
-            <button onClick={() => setToast('Каталог скоро загрузится полностью')} className="text-[13px] font-medium text-[#3A4452] flex items-center gap-1">
-              Смотреть все <span className="text-[#EF6D12]">→</span>
-            </button>
-          </div>
+          <div className="mb-5 lg:hidden"><h2 className="text-[18px] font-bold">Каталог продукции</h2></div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
             {catalog.map((item) => (
               <div
@@ -530,38 +502,9 @@ export default function App() {
             </div>
             <p className="text-[13px] text-gray-400 mt-2">Видео-презентация наших проектов</p>
 
-            {/* Фильтр */}
-            <div className="mt-8 flex flex-wrap gap-2">
-              <button 
-                onClick={() => setWorkFilter('all')}
-                className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition ${
-                  workFilter === 'all' 
-                    ? 'bg-[#EF6D12] text-white' 
-                    : 'bg-[#F0F2F5] text-[#5A667A] hover:bg-[#E8ECF0]'
-                }`}
-              >
-                Все
-              </button>
-              {catalog.map((cat) => (
-                <button 
-                  key={cat.id}
-                  onClick={() => setWorkFilter(cat.id)}
-                  className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition ${
-                    workFilter === cat.id 
-                      ? 'bg-[#EF6D12] text-white' 
-                      : 'bg-[#F0F2F5] text-[#5A667A] hover:bg-[#E8ECF0]'
-                  }`}
-                >
-                  {cat.titleShort}
-                </button>
-              ))}
-            </div>
-
             {/* Сетка работ */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-              {worksData
-                .filter(w => workFilter === 'all' || w.categoryId === workFilter)
-                .map((w) => (
+              {worksData.map((w) => (
                   <div 
                     key={w.id} 
                     onClick={() => setSelectedWork(w)} 
@@ -593,26 +536,8 @@ export default function App() {
                 ))}
             </div>
 
-            {worksData.filter(w => workFilter === 'all' || w.categoryId === workFilter).length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-[48px]">🔍</div>
-                <div className="text-[18px] font-semibold mt-2">Нет работ в этой категории</div>
-                <div className="text-[14px] text-[#5A667A]">Выберите другую категорию</div>
-              </div>
-            )}
 
-            <div className="mt-10 text-center">
-              <button
-                onClick={() => {
-                  setShowAllWorks(false);
-                  setCallbackOpen(true);
-                }}
-                className="h-[52px] px-8 bg-[#EF6D12] hover:bg-[#E0610A] text-white font-semibold rounded-[6px] transition shadow-[0_8px_20px_rgba(239,109,18,.25)]"
-              >
-                Хотите так же? Закажите консультацию
-              </button>
-              <p className="text-[13px] text-gray-400 mt-3">Перезвоним за 5 минут, расскажем про все этапы</p>
-            </div>
+            <div className="mt-10 text-center"><a href="tel:+79673448484" className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить по вопросу проекта</a></div>
           </div>
         </div>
       )}
@@ -672,15 +597,7 @@ export default function App() {
               </p>
 
               <div className="mt-6 flex gap-3 flex-wrap">
-                <button 
-                  onClick={() => {
-                    setSelectedWork(null);
-                    setCallbackOpen(true);
-                  }}
-                  className="h-[40px] px-5 bg-[#EF6D12] hover:bg-[#E0610A] text-white font-semibold rounded-[6px] text-[13px] transition"
-                >
-                  Заказать такой же проект
-                </button>
+                
                 <button 
                   onClick={() => setSelectedWork(null)} 
                   className="h-[40px] px-5 border border-gray-300 hover:bg-gray-50 font-medium rounded-[6px] text-[13px] transition"
@@ -805,22 +722,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="bg-[#F7F9FB] rounded-[12px] p-6 lg:p-7 border border-gray-100 h-fit">
-            <div className="text-[18px] font-bold leading-tight">Рассчитаем смету за 1 час</div>
-            <div className="text-[13px] text-[#5A667A] mt-1">Бесплатно, без спама. Инженер перезвонит.</div>
-            <form onSubmit={(e)=>{ e.preventDefault(); setToast('Заявка отправлена! Перезвоним в течение 15 минут.'); (e.target as HTMLFormElement).reset(); }} className="mt-6 space-y-3">
-              <input required placeholder="Ваше имя" className="w-full h-[44px] px-4 rounded-[4px] border border-gray-200 bg-white text-[14px] outline-none focus:border-[#EF6D12] focus:ring-2 focus:ring-[#EF6D12]/20" />
-              <input required placeholder="+7 (___) ___-__-__" type="tel" className="w-full h-[44px] px-4 rounded-[4px] border border-gray-200 bg-white text-[14px] outline-none focus:border-[#EF6D12] focus:ring-2 focus:ring-[#EF6D12]/20" />
-              <select className="w-full h-[44px] px-4 rounded-[4px] border border-gray-200 bg-white text-[14px] outline-none focus:border-[#EF6D12]">
-                <option>Что интересует?</option>
-                <option>Фасадная плитка</option>
-                <option>Брусчатка</option>
-                <option>Монтаж под ключ</option>
-              </select>
-              <button type="submit" className="w-full h-[46px] bg-[#EF6D12] hover:bg-[#E0610A] text-white font-semibold rounded-[4px] text-[14px] transition">Получить расчет</button>
-              <div className="text-[11px] text-gray-400 leading-[1.3] text-center">Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности</div>
-            </form>
-          </div>
+          <aside className="bg-[#F7F9FB] rounded-[12px] p-6 lg:p-7 border border-gray-100 h-fit"><div className="text-[18px] font-bold leading-tight">Свяжитесь с нами напрямую</div><p className="text-[13px] text-[#5A667A] mt-2">Позвоните или напишите нам — ответим на вопросы о продукции, наличии и доставке.</p><a href="tel:+79673448484" className="mt-5 flex items-center justify-center min-h-[48px] px-5 bg-[#EF6D12] text-white font-semibold rounded-[4px] text-[14px]">+7 (967) 344-84-84</a><a href="mailto:info@bioplit.ru" className="mt-3 block text-center text-[14px] font-semibold text-[#EF6D12]">info@bioplit.ru</a><p className="mt-5 text-[12px] text-gray-500">Санкт-Петербург и Ленинградская область</p></aside>
         </div>
       </section>
 
@@ -857,7 +759,7 @@ export default function App() {
               <div className="col-span-2 lg:col-span-1">
                 <div className="font-bold text-white mb-3">Связаться</div>
                 <a href="tel:+79673448484" className="text-[18px] font-bold text-white block">+7 (967) 344-84-84</a>
-                <button onClick={()=>setCallbackOpen(true)} className="mt-3 h-[38px] px-5 bg-[#EF6D12] text-white rounded-[4px] font-semibold text-[13px]">Заказать звонок</button>
+                
                 <div className="mt-4 text-[12px] opacity-50">п. Щеглово, Заводская 12<br/>ИНН 7806543210 • ОГРН 1147847273821</div>
               </div>
             </div>
@@ -869,36 +771,6 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Callback modal */}
-      {callbackOpen && (
-        <div className="fixed inset-0 z-[80] flex items-end lg:items-center justify-center">
-          <div onClick={()=>setCallbackOpen(false)} className="absolute inset-0 bg-[#12171F]/70 backdrop-blur-[6px]" />
-          <div className="relative w-full lg:max-w-[440px] bg-white rounded-t-[16px] lg:rounded-[12px] p-7 shadow-[0_20px_60px_rgba(0,0,0,.35)] animate-[slideUp_.3s_ease]">
-            <button onClick={()=>setCallbackOpen(false)} className="absolute right-4 top-4 w-8 h-8 rounded-full bg-[#F2F4F6] grid place-items-center">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#1B222E" strokeWidth="1.5" strokeLinecap="round"/></svg>
-            </button>
-            <div className="text-[22px] font-black tracking-[-0.02em] leading-[1.1]">Заказать звонок</div>
-            <div className="text-[13px] text-[#5A667A] mt-1">Перезвоним за 5 минут, подскажем по плитке и рассчитаем доставку.</div>
-            <form onSubmit={(e)=>{ e.preventDefault(); setCallbackOpen(false); setToast('Спасибо! Перезвоним в течение 5 минут.'); (e.target as HTMLFormElement).reset(); }} className="mt-6 space-y-3">
-              <input required placeholder="Как к вам обращаться" className="w-full h-[46px] px-4 rounded-[6px] border border-gray-200 text-[14px] focus:border-[#EF6D12] focus:ring-4 focus:ring-[#EF6D12]/15 outline-none" />
-              <input required placeholder="+7 (___) ___-__-__" type="tel" className="w-full h-[46px] px-4 rounded-[6px] border border-gray-200 text-[14px] focus:border-[#EF6D12] focus:ring-4 focus:ring-[#EF6D12]/15 outline-none" />
-              <button className="w-full h-[48px] bg-[#EF6D12] hover:bg-[#D85E0A] text-white font-semibold rounded-[6px] transition">Жду звонка</button>
-              <div className="text-[11px] text-center text-gray-400">Нажимая кнопку, вы соглашаетесь на обработку данных</div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] bg-[#1E252F] text-white px-5 py-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,.3)] text-[13px] font-medium flex items-center gap-2 max-w-[90vw] text-center animate-[slideUp_.25s_ease]">
-          <span className="w-2 h-2 bg-[#EF6D12] rounded-full animate-pulse block shrink-0" /> {toast}
-        </div>
-      )}
-
-      <style>{`
-        @keyframes slideUp { from { transform: translateY(20px); opacity:0 } to { transform: translateY(0); opacity:1 } }
-      `}</style>
     </div>
   );
 }
