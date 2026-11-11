@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import AdminPanel from './Admin';
+import { publicRows } from './lib/supabase';
 import { Player } from '@barabel324/react-player';
 import '@barabel324/react-player/css';
 
@@ -34,7 +36,7 @@ type CatalogItem = {
   images: string[];
 };
 
-const catalog: CatalogItem[] = [
+const defaultCatalog: CatalogItem[] = [
   {
     id: 'facade',
     title: 'ФАСАДНАЯ ПЛИТКА И КАМЕНЬ',
@@ -100,7 +102,7 @@ type WorkItem = {
 
 // Автоматическая загрузка работ
 const worksImages = getWorksImages(20);
-const worksData: WorkItem[] = worksImages.map((img, index) => ({
+const defaultWorksData: WorkItem[] = worksImages.map((img, index) => ({
   id: `work${index + 1}`,
   title: `Проект #${index + 1}`,
   category: 'Наши работы',
@@ -115,10 +117,55 @@ const worksData: WorkItem[] = worksImages.map((img, index) => ({
 
 export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(defaultCatalog);
+  const [workItems, setWorkItems] = useState<WorkItem[]>(defaultWorksData);
+  const [serviceItems, setServiceItems] = useState([
+    { n: '01', t: 'Монтаж фасада под ключ', d: 'Подсистема, утеплитель, плитка, затирка. Бригада 4 чел, от 80 м² за 5 дней.' },
+    { n: '02', t: 'Укладка брусчатки', d: 'Подготовка основания, геотекстиль, вибротрамбовка. Гарантия на просадку 2 года.' },
+    { n: '03', t: 'Бесплатный замер и 3D-визуализация', d: 'Выезд инженера по СПб бесплатно, покажем как будет выглядеть ваш дом.' },
+  ]);
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CatalogItem | null>(null);
   const [showAllWorks, setShowAllWorks] = useState(false);
   const [selectedWork, setSelectedWork] = useState<WorkItem | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([publicRows('catalog_items'), publicRows('works'), publicRows('services')])
+      .then(([catalogRows, workRows, serviceRows]) => {
+        if (!active) return;
+        if (catalogRows.length) setCatalogItems(catalogRows.map((row, index) => ({
+          id: String(row.id || row.category || index),
+          title: String(row.title || ''),
+          titleShort: String(row.title_short || row.title || ''),
+          image: String(row.image_url || FALLBACK_SVG),
+          fallback: FALLBACK_SVG,
+          images: row.image_url ? [String(row.image_url)] : [],
+        })));
+        if (workRows.length) setWorkItems(workRows.map((row, index) => ({
+          id: String(row.id || index),
+          title: String(row.title || ''),
+          category: String(row.category || 'Наши работы'),
+          categoryId: String(row.category || 'all'),
+          image: String(row.image_url || FALLBACK_SVG),
+          fallback: FALLBACK_SVG,
+          description: String(row.description || ''),
+          video: row.video_url ? String(row.video_url) : undefined,
+          year: String(row.year || ''),
+          location: String(row.location || ''),
+        })));
+        if (serviceRows.length) setServiceItems(serviceRows.map((row, index) => ({
+          n: String(index + 1).padStart(2, '0'),
+          t: String(row.title || ''),
+          d: String(row.description || ''),
+        })));
+      }).catch(() => {
+        // Keep the existing static content until the CMS has been configured.
+      });
+    if (window.location.pathname.replace(/\/+$/, '') === '/admin') return <AdminPanel />;
+
+  return () => { active = false; };
+  }, []);
 
   const scrollTo = (id: string) => {
     setMobileOpen(false);
@@ -195,7 +242,7 @@ export default function App() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className={`transition ${activeCat==='catalog'?'rotate-180':''}`}><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
               <div className={`absolute left-0 top-[calc(100%+18px)] w-[320px] bg-white text-[#212832] rounded-[6px] shadow-[0_20px_60px_rgba(0,0,0,.25)] p-2 border border-gray-100 transition-all ${activeCat==='catalog'?'opacity-100 translate-y-0 visible':'opacity-0 -translate-y-2 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible'}`}>
-                {catalog.map(c=>(
+                {catalogItems.map(c=>(
                   <button key={c.id} onClick={()=>{ setActiveCat(null); openCategory(c); }} className="w-full text-left px-4 py-2.5 rounded hover:bg-[#F5F6F8] flex gap-3 items-center">
                     <span className="w-10 h-10 rounded bg-[#F0F2F5] overflow-hidden shrink-0">
                       <img src={c.image} alt="" className="w-full h-full object-cover" onError={(e) => handleImageError(e, c.fallback)} />
@@ -236,7 +283,7 @@ export default function App() {
               <div>
                 <div className="text-[12px] uppercase tracking-widest font-bold text-gray-400 mb-3">Каталог</div>
                 <div className="grid gap-2">
-                  {catalog.map(c=>(
+                  {catalogItems.map(c=>(
                     <button key={c.id} onClick={()=>{ setMobileOpen(false); openCategory(c); }} className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 text-left">
                       <span className="w-12 h-12 rounded bg-gray-100 overflow-hidden">
                         <img src={c.image} alt="" className="w-full h-full object-cover" onError={(e) => handleImageError(e, c.fallback)} />
@@ -389,7 +436,7 @@ export default function App() {
         <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
           <div className="mb-5 lg:hidden"><h2 className="text-[18px] font-bold">Каталог продукции</h2></div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
-            {catalog.map((item) => (
+            {catalogItems.map((item) => (
               <div
                 key={item.id}
                 onClick={() => openCategory(item)}
@@ -504,7 +551,7 @@ export default function App() {
 
             {/* Сетка работ */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-              {worksData.map((w) => (
+              {workItems.map((w) => (
                   <div 
                     key={w.id} 
                     onClick={() => setSelectedWork(w)} 
@@ -668,11 +715,7 @@ export default function App() {
       <section className="bg-[#F5F7FA] py-10 lg:py-14">
         <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
           <div className="grid lg:grid-cols-3 gap-4">
-            {[
-              { n: '01', t: 'Монтаж фасада под ключ', d: 'Подсистема, утеплитель, плитка, затирка. Бригада 4 чел, от 80 м² за 5 дней.' },
-              { n: '02', t: 'Укладка брусчатки', d: 'Подготовка основания, геотекстиль, вибротрамбовка. Гарантия на просадку 2 года.' },
-              { n: '03', t: 'Бесплатный замер и 3D-визуализация', d: 'Выезд инженера по СПб бесплатно, покажем как будет выглядеть ваш дом.' },
-            ].map(s=>(
+            {serviceItems.map(s=>(
               <div key={s.n} className="bg-white rounded-[8px] p-6 border border-gray-100 hover:shadow-[0_8px_24px_rgba(0,0,0,.06)] transition group">
                 <div className="flex justify-between items-start">
                   <div className="text-[44px] font-black leading-none text-[#EEF1F5] group-hover:text-[#FFF0E6] transition">{s.n}</div>
@@ -744,7 +787,7 @@ export default function App() {
               <div>
                 <div className="font-bold text-white mb-3">Каталог</div>
                 <div className="space-y-2 opacity-70">
-                  {catalog.map(c=> <div key={c.id} onClick={() => openCategory(c)} className="hover:text-white cursor-pointer hover:opacity-100 transition">{c.titleShort}</div>)}
+                  {catalogItems.map(c=> <div key={c.id} onClick={() => openCategory(c)} className="hover:text-white cursor-pointer hover:opacity-100 transition">{c.titleShort}</div>)}
                 </div>
               </div>
               <div>
