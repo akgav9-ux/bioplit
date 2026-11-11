@@ -144,3 +144,15 @@ export async function uploadImage(file: File, session: AdminSession) {
 export async function publicRows(table: string) {
   return await request(`/rest/v1/${table}?select=*&is_active=eq.true&order=sort_order.asc,created_at.desc`) as Record<string, unknown>[];
 }
+
+
+export function saveRecoverySession(session: AdminSession) {
+  saveSession(session);
+}
+
+export async function updateAccountPassword(session: AdminSession, password: string) {
+  await request('/auth/v1/user', {
+    method: 'PUT',
+    body: JSON.stringify({ password }),
+  }, session);
+}
