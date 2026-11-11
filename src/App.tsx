@@ -221,9 +221,9 @@ export default function App() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <a href="tel:+79673448484" className="hidden md:flex text-[16px] font-semibold tracking-[-0.01em] hover:text-[#EF6D12] transition">+7 (967) 344-84-84</a>
+            <a href="tel:+79668591206" className="hidden md:flex text-[16px] font-semibold tracking-[-0.01em] hover:text-[#EF6D12] transition">+7 (966) 859-12-06</a>
             
-            <a href="tel:+79673448484" className="lg:hidden w-9 h-9 grid place-items-center rounded-full bg-white/10">
+            <a href="tel:+79668591206" className="lg:hidden w-9 h-9 grid place-items-center rounded-full bg-white/10">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6.6 4.6c-.4-.4-.9-.6-1.5-.5L3.7 4.3c-1 .2-1.6 1.3-1.2 2.3C4.2 11.2 7.8 14.8 12.4 16.5c1 .4 2.1-.2 2.3-1.2l.2-1.4c.1-.6-.1-1.1-.5-1.5l-1.8-1.8c-.4-.4-1-.5-1.5-.3l-.9.3c-.5.2-1.1.1-1.5-.3l-1.3-1.3c-.4-.4-.5-1-.3-1.5l.3-.9c.2-.5 0-1.1-.3-1.5L6.6 4.6Z" stroke="#EF6D12" strokeWidth="1.4" strokeLinejoin="round"/></svg>
             </a>
           </div>
@@ -252,7 +252,7 @@ export default function App() {
                 <button onClick={()=>scrollTo('contacts')} className="block text-[16px] font-medium">Контакты</button>
                 <div className="pt-4">
                   <div className="text-[13px] text-gray-500">Позвоните нам</div>
-                  <a href="tel:+79673448484" className="text-[18px] font-bold">+7 (967) 344-84-84</a>
+                  <a href="tel:+79668591206" className="text-[18px] font-bold">+7 (966) 859-12-06</a>
                 </div>
                 
               </div>
@@ -273,7 +273,7 @@ export default function App() {
                 Назад в каталог
               </button>
               <div className="text-[16px] font-bold text-[#EF6D12]">{selectedCategory.titleShort}</div>
-              <a href="tel:+79673448484" className="text-[14px] font-semibold hover:text-[#EF6D12] transition">+7 (967) 344-84-84</a>
+              <a href="tel:+79668591206" className="text-[14px] font-semibold hover:text-[#EF6D12] transition">+7 (966) 859-12-06</a>
             </div>
           </div>
 
@@ -304,7 +304,7 @@ export default function App() {
               ))}
             </div>
 
-            <div className="mt-10 text-center"><a href="tel:+79673448484" className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить и уточнить наличие</a><p className="text-[13px] text-gray-400 mt-3">Поможем с выбором и ответим на вопросы</p></div>
+            <div className="mt-10 text-center"><a href="tel:+79668591206" className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить и уточнить наличие</a><p className="text-[13px] text-gray-400 mt-3">Поможем с выбором и ответим на вопросы</p></div>
           </div>
         </div>
       )}
@@ -481,7 +481,7 @@ export default function App() {
                 Назад
               </button>
               <div className="text-[16px] font-bold text-[#EF6D12]">Все работы</div>
-              <a href="tel:+79673448484" className="text-[14px] font-semibold hover:text-[#EF6D12] transition">+7 (967) 344-84-84</a>
+              <a href="tel:+79668591206" className="text-[14px] font-semibold hover:text-[#EF6D12] transition">+7 (966) 859-12-06</a>
             </div>
           </div>
 
@@ -537,7 +537,7 @@ export default function App() {
             </div>
 
 
-            <div className="mt-10 text-center"><a href="tel:+79673448484" className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить по вопросу проекта</a></div>
+            <div className="mt-10 text-center"><a href="tel:+79668591206" className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить по вопросу проекта</a></div>
           </div>
         </div>
       )}
@@ -700,7 +700,7 @@ export default function App() {
               </div>
               <div>
                 <div className="text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">Телефон и почта</div>
-                <a href="tel:+79673448484" className="block text-[18px] font-bold">+7 (967) 344-84-84</a>
+                <a href="tel:+79668591206" className="block text-[18px] font-bold">+7 (966) 859-12-06</a>
                 <a href="mailto:info@bioplit.ru" className="text-[14px] text-[#EF6D12] font-medium">info@bioplit.ru</a>
                 <div className="text-[13px] text-gray-500 mt-1">Пн-Сб 9:00-19:00, Вс - по записи</div>
               </div>
@@ -722,7 +722,7 @@ export default function App() {
             </div>
           </div>
 
-          <aside className="bg-[#F7F9FB] rounded-[12px] p-6 lg:p-7 border border-gray-100 h-fit"><div className="text-[18px] font-bold leading-tight">Свяжитесь с нами напрямую</div><p className="text-[13px] text-[#5A667A] mt-2">Позвоните или напишите нам — ответим на вопросы о продукции, наличии и доставке.</p><a href="tel:+79673448484" className="mt-5 flex items-center justify-center min-h-[48px] px-5 bg-[#EF6D12] text-white font-semibold rounded-[4px] text-[14px]">+7 (967) 344-84-84</a><a href="mailto:info@bioplit.ru" className="mt-3 block text-center text-[14px] font-semibold text-[#EF6D12]">info@bioplit.ru</a><p className="mt-5 text-[12px] text-gray-500">Санкт-Петербург и Ленинградская область</p></aside>
+          <aside className="bg-[#F7F9FB] rounded-[12px] p-6 lg:p-7 border border-gray-100 h-fit"><div className="text-[18px] font-bold leading-tight">Свяжитесь с нами напрямую</div><p className="text-[13px] text-[#5A667A] mt-2">Позвоните или напишите нам — ответим на вопросы о продукции, наличии и доставке.</p><a href="tel:+79668591206" className="mt-5 flex items-center justify-center min-h-[48px] px-5 bg-[#EF6D12] text-white font-semibold rounded-[4px] text-[14px]">+7 (966) 859-12-06</a><a href="mailto:info@bioplit.ru" className="mt-3 block text-center text-[14px] font-semibold text-[#EF6D12]">info@bioplit.ru</a><p className="mt-5 text-[12px] text-gray-500">Санкт-Петербург и Ленинградская область</p></aside>
         </div>
       </section>
 
@@ -758,7 +758,7 @@ export default function App() {
               </div>
               <div className="col-span-2 lg:col-span-1">
                 <div className="font-bold text-white mb-3">Связаться</div>
-                <a href="tel:+79673448484" className="text-[18px] font-bold text-white block">+7 (967) 344-84-84</a>
+                <a href="tel:+79668591206" className="text-[18px] font-bold text-white block">+7 (966) 859-12-06</a>
                 
                 <div className="mt-4 text-[12px] opacity-50">п. Щеглово, Заводская 12<br/>ИНН 7806543210 • ОГРН 1147847273821</div>
               </div>
