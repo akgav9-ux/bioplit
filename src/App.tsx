@@ -31,6 +31,7 @@ type CatalogItem = {
   id: string;
   title: string;
   titleShort: string;
+  categoryKey: string;
   image: string;
   fallback: string;
   images: string[];
@@ -39,6 +40,7 @@ type CatalogItem = {
 const defaultCatalog: CatalogItem[] = [
   {
     id: 'facade',
+    categoryKey: 'facade',
     title: 'ФАСАДНАЯ ПЛИТКА И КАМЕНЬ',
     titleShort: 'Фасадная плитка и камень',
     image: '/images/catalog/facade/1.jpg',
@@ -47,6 +49,7 @@ const defaultCatalog: CatalogItem[] = [
   },
   {
     id: 'cokol',
+    categoryKey: 'cokol',
     title: 'ЦОКОЛЬНЫЕ ПАНЕЛИ',
     titleShort: 'Цокольные панели',
     image: '/images/catalog/cokol/1.jpg',
@@ -55,6 +58,7 @@ const defaultCatalog: CatalogItem[] = [
   },
   {
     id: 'brus',
+    categoryKey: 'brus',
     title: 'БРУСЧАТКА И ТРОТУАРНАЯ ПЛИТКА',
     titleShort: 'Брусчатка и тротуарная плитка',
     image: '/images/catalog/brus/1.jpg',
@@ -63,6 +67,7 @@ const defaultCatalog: CatalogItem[] = [
   },
   {
     id: 'tactile',
+    categoryKey: 'tactile',
     title: 'ТАКТИЛЬНАЯ ПЛИТКА',
     titleShort: 'Тактильная плитка',
     image: '/images/catalog/tactile/1.jpg',
@@ -71,6 +76,7 @@ const defaultCatalog: CatalogItem[] = [
   },
   {
     id: 'bord',
+    categoryKey: 'bord',
     title: 'БОРДЮРЫ И ВОДОСТОКИ',
     titleShort: 'Бордюры и водостоки',
     image: '/images/catalog/bord/1.jpg',
@@ -79,6 +85,7 @@ const defaultCatalog: CatalogItem[] = [
   },
   {
     id: 'vazon',
+    categoryKey: 'vazon',
     title: 'ЦВЕТОЧНЫЕ ВАЗОНЫ',
     titleShort: 'Цветочные вазоны',
     image: '/images/catalog/vazon/1.jpg',
@@ -118,6 +125,7 @@ const defaultWorksData: WorkItem[] = worksImages.map((img, index) => ({
 export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(defaultCatalog);
+  const [catalogProducts, setCatalogProducts] = useState<Array<{ id: string; title: string; article: string; category: string; description: string; image: string; price: string; unit: string }>>([]);
   const [workItems, setWorkItems] = useState<WorkItem[]>(defaultWorksData);
   const [priceItems, setPriceItems] = useState<Array<{ id: string; title: string; category: string; price: string; unit: string; description: string }>>([
     { id: 'sample-1', title: 'Фасадная плитка', category: 'Фасадная плитка и камень', price: '2400', unit: 'м²', description: 'Предварительная цена за квадратный метр' },
@@ -142,16 +150,27 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([publicRows('catalog_items'), publicRows('works'), publicRows('services'), publicRows('price_items'), publicRows('site_settings')])
-      .then(([catalogRows, workRows, serviceRows, priceRows, settingRows]) => {
+    Promise.all([publicRows('catalog_items'), publicRows('catalog_products'), publicRows('works'), publicRows('services'), publicRows('price_items'), publicRows('site_settings')])
+      .then(([catalogRows, productRows, workRows, serviceRows, priceRows, settingRows]) => {
         if (!active) return;
         if (catalogRows.length) setCatalogItems(catalogRows.map((row, index) => ({
           id: String(row.id || row.category || index),
           title: String(row.title || ''),
           titleShort: String(row.title_short || row.title || ''),
+          categoryKey: String(row.category || ''),
           image: String(row.image_url || FALLBACK_SVG),
           fallback: FALLBACK_SVG,
           images: row.image_url ? [String(row.image_url)] : [],
+        })));
+        if (productRows.length) setCatalogProducts(productRows.map((row, index) => ({
+          id: String(row.id || index),
+          title: String(row.title || ''),
+          article: String(row.article || ''),
+          category: String(row.category || ''),
+          description: String(row.description || ''),
+          image: String(row.image_url || FALLBACK_SVG),
+          price: String(row.price ?? ''),
+          unit: String(row.unit || ''),
         })));
         if (workRows.length) setWorkItems(workRows.map((row, index) => ({
           id: String(row.id || index),
@@ -351,24 +370,38 @@ export default function App() {
               Выберите подходящий вариант из нашего каталога. Все материалы в наличии на складе в СПб.
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
-              {selectedCategory.images.map((img, i) => (
-                <div key={i} className="group bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100 hover:border-[#EF6D12]/30 hover:shadow-[0_12px_30px_rgba(16,24,40,.08)] transition-all cursor-pointer">
-                  <div className="aspect-[4/3] overflow-hidden bg-[#E8ECF0]">
-                    <img
-                      src={img}
-                      alt={`${selectedCategory.titleShort} ${i + 1}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                      onError={(e) => handleImageError(e, selectedCategory.fallback)}
-                    />
+            {catalogProducts.some(product => product.category === selectedCategory.categoryKey) ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
+                {catalogProducts.filter(product => product.category === selectedCategory.categoryKey).map(product => (
+                  <article key={product.id} className="bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100">
+                    <div className="aspect-[4/3] overflow-hidden bg-[#E8ECF0]">
+                      <img src={product.image} alt={product.title} className="w-full h-full object-cover" onError={(e) => handleImageError(e, selectedCategory.fallback)} />
+                    </div>
+                    <div className="p-3">
+                      <h2 className="text-[13px] font-bold">{product.title}</h2>
+                      {product.article && <div className="mt-1 text-[11px] text-[#5A667A]">Артикул: {product.article}</div>}
+                      {product.description && <p className="mt-2 text-[12px] text-[#5A667A]">{product.description}</p>}
+                      <div className="mt-3 text-[16px] font-black text-[#EF6D12]">{product.price ? `${Number(product.price).toLocaleString('ru-RU')} ₽${product.unit ? ` / ${product.unit}` : ''}` : 'Цена уточняется'}</div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
+                {selectedCategory.images.map((img, i) => (
+                  <div key={i} className="group bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100">
+                    <div className="aspect-[4/3] overflow-hidden bg-[#E8ECF0]">
+                      <img src={img} alt={`${selectedCategory.titleShort} ${i + 1}`} className="w-full h-full object-cover" onError={(e) => handleImageError(e, selectedCategory.fallback)} />
+                    </div>
+                    <div className="p-3">
+                      <div className="text-[13px] font-semibold">Модель #{i + 1}</div>
+                      <div className="text-[12px] text-[#5A667A]">Артикул: {selectedCategory.id.toUpperCase()}-{String(i + 1).padStart(3, '0')}</div>
+                      <div className="mt-2 text-[13px] font-bold text-[#EF6D12]">Цена уточняется</div>
+                    </div>
                   </div>
-                  <div className="p-3">
-                    <div className="text-[13px] font-semibold">Модель #{i + 1}</div>
-                    <div className="text-[12px] text-[#5A667A]">Артикул: {selectedCategory.id.toUpperCase()}-{String(i + 1).padStart(3, '0')}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             <div className="mt-10 text-center"><a href={`tel:${sitePhone}`} className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить и уточнить наличие</a><p className="text-[13px] text-gray-400 mt-3">Поможем с выбором и ответим на вопросы</p></div>
           </div>
