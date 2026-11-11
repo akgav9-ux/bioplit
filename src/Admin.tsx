@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   currentSession, deleteRow, getSession, isAdmin, listRows, saveRow, signIn, signOut,
-  uploadImage, type AdminSession,
+  uploadImage, sendPasswordReset, type AdminSession,
 } from './lib/supabase';
 
 type Row = Record<string, unknown>;
@@ -75,6 +75,8 @@ export default function AdminPanel() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [showForgot, setShowForgot] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const section = useMemo(() => sections.find(item => item.id === active) || sections[0], [active]);
 
@@ -120,6 +122,19 @@ export default function AdminPanel() {
     finally { setBusy(false); }
   }
 
+  async function handlePasswordReset(event: React.FormEvent) {
+    event.preventDefault();
+    setBusy(true); setError(''); setNotice('');
+    try {
+      await sendPasswordReset(email.trim());
+      setResetSent(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Не удалось отправить письмо');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function switchSection(id: string) {
     setActive(id); setEditing(null); setError(''); setNotice('');
   }
@@ -160,18 +175,35 @@ export default function AdminPanel() {
 
   if (!session || !authorized) return (
     <main className="min-h-screen bg-[#171D27] flex items-center justify-center p-4">
-      <form onSubmit={handleLogin} className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
-        <a href="/" className="text-sm font-semibold text-orange-600">← На сайт БИОПЛИТ</a>
-        <div className="mt-7 text-3xl font-black text-slate-900">БИО<span className="text-orange-600">ПЛИТ</span></div>
-        <h1 className="mt-2 text-xl font-bold text-slate-800">Панель управления</h1>
-        <p className="mt-2 text-sm text-slate-500">Вход только для пользователей, которым выдан доступ администратора.</p>
-        <label className="mt-6 block text-sm font-semibold text-slate-700">Электронная почта</label>
-        <input type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 outline-none focus:border-orange-500" />
-        <label className="mt-4 block text-sm font-semibold text-slate-700">Пароль</label>
-        <input type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 outline-none focus:border-orange-500" />
-        {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-        <button disabled={busy} className="mt-6 w-full rounded-lg bg-orange-600 py-3 font-bold text-white hover:bg-orange-700 disabled:opacity-50">{busy ? 'Входим…' : 'Войти'}</button>
-      </form>
+      {showForgot ? (
+        <form onSubmit={handlePasswordReset} className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+          <a href="/" className="text-sm font-semibold text-orange-600">← На сайт БИОПЛИТ</a>
+          <div className="mt-7 text-3xl font-black text-slate-900">БИО<span className="text-orange-600">ПЛИТ</span></div>
+          <h1 className="mt-2 text-xl font-bold text-slate-800">Восстановление пароля</h1>
+          {resetSent ? <p className="mt-5 rounded-lg bg-emerald-50 p-4 text-sm text-emerald-800">Если аккаунт с этой почтой существует, письмо для восстановления отправлено. Откройте последнее письмо и перейдите по ссылке.</p> : <>
+            <p className="mt-2 text-sm text-slate-500">Укажите почту администратора. Мы отправим ссылку для создания нового пароля.</p>
+            <label className="mt-6 block text-sm font-semibold text-slate-700">Электронная почта</label>
+            <input type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 outline-none focus:border-orange-500" />
+            {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+            <button disabled={busy} className="mt-6 w-full rounded-lg bg-orange-600 py-3 font-bold text-white hover:bg-orange-700 disabled:opacity-50">{busy ? 'Отправляем…' : 'Отправить ссылку'}</button>
+          </>}
+          <button type="button" onClick={() => { setShowForgot(false); setResetSent(false); setError(''); }} className="mt-4 w-full text-sm font-semibold text-slate-600">Вернуться ко входу</button>
+        </form>
+      ) : (
+        <form onSubmit={handleLogin} className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+          <a href="/" className="text-sm font-semibold text-orange-600">← На сайт БИОПЛИТ</a>
+          <div className="mt-7 text-3xl font-black text-slate-900">БИО<span className="text-orange-600">ПЛИТ</span></div>
+          <h1 className="mt-2 text-xl font-bold text-slate-800">Панель управления</h1>
+          <p className="mt-2 text-sm text-slate-500">Вход только для пользователей, которым выдан доступ администратора.</p>
+          <label className="mt-6 block text-sm font-semibold text-slate-700">Электронная почта</label>
+          <input type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 outline-none focus:border-orange-500" />
+          <label className="mt-4 block text-sm font-semibold text-slate-700">Пароль</label>
+          <input type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 outline-none focus:border-orange-500" />
+          {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+          <button disabled={busy} className="mt-6 w-full rounded-lg bg-orange-600 py-3 font-bold text-white hover:bg-orange-700 disabled:opacity-50">{busy ? 'Входим…' : 'Войти'}</button>
+          <button type="button" onClick={() => { setShowForgot(true); setError(''); }} className="mt-4 w-full text-sm font-semibold text-orange-700 hover:underline">Забыли пароль?</button>
+        </form>
+      )}
     </main>
   );
 
