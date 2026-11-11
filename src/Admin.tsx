@@ -9,20 +9,14 @@ type Field = { key: string; label: string; type?: 'text' | 'textarea' | 'number'
 type Section = { id: string; title: string; table: string; fields: Field[] };
 
 const sections: Section[] = [
-  { id: 'catalog', title: 'Каталог', table: 'catalog_items', fields: [
-    { key: 'title', label: 'Название', required: true }, { key: 'title_short', label: 'Короткое название' },
-    { key: 'category', label: 'Категория' }, { key: 'description', label: 'Описание', type: 'textarea' },
-    { key: 'image_url', label: 'Фото (URL)' }, { key: 'price', label: 'Цена', type: 'number' },
-    { key: 'unit', label: 'Единица измерения' }, { key: 'width', label: 'Ширина (мм)' }, { key: 'length', label: 'Длина (мм)' }, { key: 'thickness', label: 'Толщина (мм)' }, { key: 'sort_order', label: 'Порядок', type: 'number' },
-    { key: 'is_active', label: 'Показывать на сайте', type: 'checkbox' },
-  ]},
-  { id: 'products', title: 'Товары каталога', table: 'catalog_products', fields: [
+  { id: 'products', title: 'Каталог товаров', table: 'catalog_products', fields: [
     { key: 'title', label: 'Название товара', required: true },
     { key: 'article', label: 'Артикул' },
     { key: 'category', label: 'Категория', type: 'select', required: true, options: [
       { value: 'facade', label: 'Фасадная плитка и камень' },
       { value: 'cokol', label: 'Цокольные панели' },
       { value: 'brus', label: 'Брусчатка и тротуарная плитка' },
+      { value: 'large-format', label: 'Крупноформатная тротуарная плитка' },
       { value: 'tactile', label: 'Тактильная плитка' },
       { value: 'bord', label: 'Бордюры и водостоки' },
       { value: 'vazon', label: 'Цветочные вазоны' },
@@ -69,7 +63,7 @@ export default function AdminPanel() {
   const [authorized, setAuthorized] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [active, setActive] = useState('catalog');
+  const [active, setActive] = useState('products');
   const [rows, setRows] = useState<Row[]>([]);
   const [editing, setEditing] = useState<Row | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -151,7 +145,7 @@ export default function AdminPanel() {
     setBusy(true); setError('');
     try {
       const next = { ...editing };
-      if (section.id === 'catalog' || section.id === 'products') {
+      if (section.id === 'products') {
         const existingImages = Array.isArray(next.images) ? next.images as string[] : (next.image_url ? [String(next.image_url)] : []);
         if (imageFiles.length) next.images = [...existingImages, ...(await Promise.all(imageFiles.map(file => uploadImage(file, session))))].slice(0, 5);
         else next.images = existingImages.slice(0, 5);
@@ -245,7 +239,7 @@ export default function AdminPanel() {
                     : field.type === 'select' ? <select required={field.required} value={String(editing[field.key] ?? '')} onChange={e => updateField(field.key, e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white p-3"><option value="">Выберите категорию</option>{(field.options || []).map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
                     : <input type={field.type === 'number' ? 'number' : field.type === 'url' ? 'url' : 'text'} required={field.required} value={String(editing[field.key] ?? '')} onChange={e => updateField(field.key, field.type === 'number' ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white p-3" />}
                 </label>)}
-                {(section.id === 'catalog' || section.id === 'products') ? <div className="sm:col-span-2 rounded-xl border border-dashed border-orange-300 bg-white p-4">
+                {(section.id === 'products') ? <div className="sm:col-span-2 rounded-xl border border-dashed border-orange-300 bg-white p-4">
                   <div className="text-sm font-bold text-slate-800">Фотографии товара (до 5 штук)</div>
                   <p className="mt-1 text-xs text-slate-500">Можно выбрать сразу несколько фото. JPG, PNG, WEBP или AVIF, до 10 МБ каждое.</p>
                   <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-2">
