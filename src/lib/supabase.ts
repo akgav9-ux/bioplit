@@ -146,16 +146,6 @@ export async function publicRows(table: string) {
 }
 
 
-export function saveRecoverySession(session: AdminSession) {
-  saveSession(session);
-}
-
-export async function updateAccountPassword(session: AdminSession, password: string) {
-  await request('/auth/v1/user', {
-    method: 'PUT',
-    body: JSON.stringify({ password }),
-  }, session);
-}
 
 
 export async function sendPasswordReset(email: string) {
