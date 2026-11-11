@@ -119,6 +119,7 @@ export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(defaultCatalog);
   const [workItems, setWorkItems] = useState<WorkItem[]>(defaultWorksData);
+  const [priceItems, setPriceItems] = useState<Array<{ id: string; title: string; category: string; price: string; unit: string; description: string }>>([]);
   const [serviceItems, setServiceItems] = useState([
     { n: '01', t: 'Монтаж фасада под ключ', d: 'Подсистема, утеплитель, плитка, затирка. Бригада 4 чел, от 80 м² за 5 дней.' },
     { n: '02', t: 'Укладка брусчатки', d: 'Подготовка основания, геотекстиль, вибротрамбовка. Гарантия на просадку 2 года.' },
@@ -131,8 +132,8 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([publicRows('catalog_items'), publicRows('works'), publicRows('services')])
-      .then(([catalogRows, workRows, serviceRows]) => {
+    Promise.all([publicRows('catalog_items'), publicRows('works'), publicRows('services'), publicRows('price_items')])
+      .then(([catalogRows, workRows, serviceRows, priceRows]) => {
         if (!active) return;
         if (catalogRows.length) setCatalogItems(catalogRows.map((row, index) => ({
           id: String(row.id || row.category || index),
@@ -154,6 +155,7 @@ export default function App() {
           year: String(row.year || ''),
           location: String(row.location || ''),
         })));
+        if (priceRows.length) setPriceItems(priceRows.map((row, index) => ({ id: String(row.id || index), title: String(row.title || ''), category: String(row.category || ''), price: String(row.price ?? ''), unit: String(row.unit || ''), description: String(row.description || '') })));
         if (serviceRows.length) setServiceItems(serviceRows.map((row, index) => ({
           n: String(index + 1).padStart(2, '0'),
           t: String(row.title || ''),
@@ -730,6 +732,21 @@ export default function App() {
           </div>
         </div>
       </section>
+
+      {priceItems.length > 0 && (
+        <section id="prices" className="bg-white py-12 lg:py-16 border-t border-gray-100">
+          <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
+            <h2 className="text-[26px] lg:text-[34px] font-black">Прайс-лист</h2>
+            <p className="mt-2 text-sm text-[#5A667A]">Уточняйте наличие и итоговую стоимость по телефону.</p>
+            <div className="mt-7 overflow-x-auto rounded-lg border border-gray-100">
+              <table className="w-full min-w-[520px] text-left text-sm">
+                <thead className="bg-[#F5F7FA] text-[#5A667A]"><tr><th className="px-4 py-3">Наименование</th><th className="px-4 py-3">Категория</th><th className="px-4 py-3">Стоимость</th></tr></thead>
+                <tbody>{priceItems.map(item => <tr key={item.id} className="border-t border-gray-100"><td className="px-4 py-4 font-semibold">{item.title}{item.description && <div className="mt-1 text-xs font-normal text-[#8A96A8]">{item.description}</div>}</td><td className="px-4 py-4 text-[#5A667A]">{item.category || '—'}</td><td className="px-4 py-4 font-bold text-[#EF6D12]">{item.price ? `${Number(item.price).toLocaleString('ru-RU')} ₽` : 'По запросу'}{item.unit ? ` / ${item.unit}` : ''}</td></tr>)}</tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Contacts */}
       <section id="contacts" className="bg-white py-10 lg:py-16 border-t">
