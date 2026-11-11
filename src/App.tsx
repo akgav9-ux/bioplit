@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import AdminPanel from './Admin';
+import { publicRows } from './lib/supabase';
 import { Player } from '@barabel324/react-player';
 import '@barabel324/react-player/css';
 
@@ -34,7 +36,7 @@ type CatalogItem = {
   images: string[];
 };
 
-const catalog: CatalogItem[] = [
+const defaultCatalog: CatalogItem[] = [
   {
     id: 'facade',
     title: 'ФАСАДНАЯ ПЛИТКА И КАМЕНЬ',
@@ -100,7 +102,7 @@ type WorkItem = {
 
 // Автоматическая загрузка работ
 const worksImages = getWorksImages(20);
-const worksData: WorkItem[] = worksImages.map((img, index) => ({
+const defaultWorksData: WorkItem[] = worksImages.map((img, index) => ({
   id: `work${index + 1}`,
   title: `Проект #${index + 1}`,
   category: 'Наши работы',
@@ -115,10 +117,61 @@ const worksData: WorkItem[] = worksImages.map((img, index) => ({
 
 export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(defaultCatalog);
+  const [workItems, setWorkItems] = useState<WorkItem[]>(defaultWorksData);
+  const [priceItems, setPriceItems] = useState<Array<{ id: string; title: string; category: string; price: string; unit: string; description: string }>>([]);
+  const [siteSettings, setSiteSettings] = useState<Record<string, string>>({});
+  const [serviceItems, setServiceItems] = useState([
+    { n: '01', t: 'Монтаж фасада под ключ', d: 'Подсистема, утеплитель, плитка, затирка. Бригада 4 чел, от 80 м² за 5 дней.' },
+    { n: '02', t: 'Укладка брусчатки', d: 'Подготовка основания, геотекстиль, вибротрамбовка. Гарантия на просадку 2 года.' },
+    { n: '03', t: 'Бесплатный замер и 3D-визуализация', d: 'Выезд инженера по СПб бесплатно, покажем как будет выглядеть ваш дом.' },
+  ]);
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CatalogItem | null>(null);
   const [showAllWorks, setShowAllWorks] = useState(false);
   const [selectedWork, setSelectedWork] = useState<WorkItem | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([publicRows('catalog_items'), publicRows('works'), publicRows('services'), publicRows('price_items'), publicRows('site_settings')])
+      .then(([catalogRows, workRows, serviceRows, priceRows, settingRows]) => {
+        if (!active) return;
+        if (catalogRows.length) setCatalogItems(catalogRows.map((row, index) => ({
+          id: String(row.id || row.category || index),
+          title: String(row.title || ''),
+          titleShort: String(row.title_short || row.title || ''),
+          image: String(row.image_url || FALLBACK_SVG),
+          fallback: FALLBACK_SVG,
+          images: row.image_url ? [String(row.image_url)] : [],
+        })));
+        if (workRows.length) setWorkItems(workRows.map((row, index) => ({
+          id: String(row.id || index),
+          title: String(row.title || ''),
+          category: String(row.category || 'Наши работы'),
+          categoryId: String(row.category || 'all'),
+          image: String(row.image_url || FALLBACK_SVG),
+          fallback: FALLBACK_SVG,
+          description: String(row.description || ''),
+          video: row.video_url ? String(row.video_url) : undefined,
+          year: String(row.year || ''),
+          location: String(row.location || ''),
+        })));
+        if (settingRows.length) setSiteSettings(Object.fromEntries(settingRows.map(row => [String(row.key || ''), String(row.value || '')])));
+        if (priceRows.length) setPriceItems(priceRows.map((row, index) => ({ id: String(row.id || index), title: String(row.title || ''), category: String(row.category || ''), price: String(row.price ?? ''), unit: String(row.unit || ''), description: String(row.description || '') })));
+        if (serviceRows.length) setServiceItems(serviceRows.map((row, index) => ({
+          n: String(index + 1).padStart(2, '0'),
+          t: String(row.title || ''),
+          d: String(row.description || ''),
+        })));
+      }).catch(() => {
+        // Keep the existing static content until the CMS has been configured.
+      });
+    return () => { active = false; };
+  }, []);
+
+  const sitePhone = siteSettings.phone || '+79668591206';
+  const sitePhoneDisplay = siteSettings.phone_display || '+7 (966) 859-12-06';
+  const siteEmail = siteSettings.email || 'info@bioplit.ru';
 
   const scrollTo = (id: string) => {
     setMobileOpen(false);
@@ -140,6 +193,8 @@ export default function App() {
       img.src = fallback;
     }
   };
+
+  if (window.location.pathname.replace(/\/+$/, '') === '/admin') return <AdminPanel />;
 
   return (
     <div className="min-h-screen bg-white text-[#1B222E] antialiased selection:bg-[#FF6B00] selection:text-white">
@@ -195,7 +250,7 @@ export default function App() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className={`transition ${activeCat==='catalog'?'rotate-180':''}`}><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
               <div className={`absolute left-0 top-[calc(100%+18px)] w-[320px] bg-white text-[#212832] rounded-[6px] shadow-[0_20px_60px_rgba(0,0,0,.25)] p-2 border border-gray-100 transition-all ${activeCat==='catalog'?'opacity-100 translate-y-0 visible':'opacity-0 -translate-y-2 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible'}`}>
-                {catalog.map(c=>(
+                {catalogItems.map(c=>(
                   <button key={c.id} onClick={()=>{ setActiveCat(null); openCategory(c); }} className="w-full text-left px-4 py-2.5 rounded hover:bg-[#F5F6F8] flex gap-3 items-center">
                     <span className="w-10 h-10 rounded bg-[#F0F2F5] overflow-hidden shrink-0">
                       <img src={c.image} alt="" className="w-full h-full object-cover" onError={(e) => handleImageError(e, c.fallback)} />
@@ -215,15 +270,16 @@ export default function App() {
                 <div className="px-4 py-2 text-[13px] hover:bg-gray-50 rounded">Доставка и расчет</div>
               </div>
             </div>
+            <button onClick={()=>scrollTo('prices')} className="hover:text-[#EF6D12] transition">Цены</button>
             <button onClick={()=>scrollTo('works')} className="hover:text-[#EF6D12] transition">Наши работы</button>
             <button onClick={()=>scrollTo('about')} className="hover:text-[#EF6D12] transition">О компании</button>
             <button onClick={()=>scrollTo('contacts')} className="hover:text-[#EF6D12] transition">Контакты</button>
           </nav>
 
           <div className="flex items-center gap-4">
-            <a href="tel:+79668591206" className="hidden md:flex text-[16px] font-semibold tracking-[-0.01em] hover:text-[#EF6D12] transition">+7 (966) 859-12-06</a>
+            <a href={`tel:${sitePhone}`} className="hidden md:flex text-[16px] font-semibold tracking-[-0.01em] hover:text-[#EF6D12] transition">{sitePhoneDisplay}</a>
             
-            <a href="tel:+79668591206" className="lg:hidden w-9 h-9 grid place-items-center rounded-full bg-white/10">
+            <a href={`tel:${sitePhone}`} className="lg:hidden w-9 h-9 grid place-items-center rounded-full bg-white/10">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6.6 4.6c-.4-.4-.9-.6-1.5-.5L3.7 4.3c-1 .2-1.6 1.3-1.2 2.3C4.2 11.2 7.8 14.8 12.4 16.5c1 .4 2.1-.2 2.3-1.2l.2-1.4c.1-.6-.1-1.1-.5-1.5l-1.8-1.8c-.4-.4-1-.5-1.5-.3l-.9.3c-.5.2-1.1.1-1.5-.3l-1.3-1.3c-.4-.4-.5-1-.3-1.5l.3-.9c.2-.5 0-1.1-.3-1.5L6.6 4.6Z" stroke="#EF6D12" strokeWidth="1.4" strokeLinejoin="round"/></svg>
             </a>
           </div>
@@ -236,7 +292,7 @@ export default function App() {
               <div>
                 <div className="text-[12px] uppercase tracking-widest font-bold text-gray-400 mb-3">Каталог</div>
                 <div className="grid gap-2">
-                  {catalog.map(c=>(
+                  {catalogItems.map(c=>(
                     <button key={c.id} onClick={()=>{ setMobileOpen(false); openCategory(c); }} className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 text-left">
                       <span className="w-12 h-12 rounded bg-gray-100 overflow-hidden">
                         <img src={c.image} alt="" className="w-full h-full object-cover" onError={(e) => handleImageError(e, c.fallback)} />
@@ -247,12 +303,13 @@ export default function App() {
                 </div>
               </div>
               <div className="space-y-3 pt-4 border-t">
+                <button onClick={()=>scrollTo('prices')} className="block text-[16px] font-medium">Цены</button>
                 <button onClick={()=>scrollTo('works')} className="block text-[16px] font-medium">Наши работы</button>
                 <button onClick={()=>scrollTo('about')} className="block text-[16px] font-medium">О компании</button>
                 <button onClick={()=>scrollTo('contacts')} className="block text-[16px] font-medium">Контакты</button>
                 <div className="pt-4">
                   <div className="text-[13px] text-gray-500">Позвоните нам</div>
-                  <a href="tel:+79668591206" className="text-[18px] font-bold">+7 (966) 859-12-06</a>
+                  <a href={`tel:${sitePhone}`} className="text-[18px] font-bold">{sitePhoneDisplay}</a>
                 </div>
                 
               </div>
@@ -273,7 +330,7 @@ export default function App() {
                 Назад в каталог
               </button>
               <div className="text-[16px] font-bold text-[#EF6D12]">{selectedCategory.titleShort}</div>
-              <a href="tel:+79668591206" className="text-[14px] font-semibold hover:text-[#EF6D12] transition">+7 (966) 859-12-06</a>
+              <a href={`tel:${sitePhone}`} className="text-[14px] font-semibold hover:text-[#EF6D12] transition">{sitePhoneDisplay}</a>
             </div>
           </div>
 
@@ -304,7 +361,7 @@ export default function App() {
               ))}
             </div>
 
-            <div className="mt-10 text-center"><a href="tel:+79668591206" className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить и уточнить наличие</a><p className="text-[13px] text-gray-400 mt-3">Поможем с выбором и ответим на вопросы</p></div>
+            <div className="mt-10 text-center"><a href={`tel:${sitePhone}`} className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить и уточнить наличие</a><p className="text-[13px] text-gray-400 mt-3">Поможем с выбором и ответим на вопросы</p></div>
           </div>
         </div>
       )}
@@ -389,7 +446,7 @@ export default function App() {
         <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
           <div className="mb-5 lg:hidden"><h2 className="text-[18px] font-bold">Каталог продукции</h2></div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
-            {catalog.map((item) => (
+            {catalogItems.map((item) => (
               <div
                 key={item.id}
                 onClick={() => openCategory(item)}
@@ -434,7 +491,7 @@ export default function App() {
             </button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
-            {worksData.slice(0, 5).map((w) => (
+            {workItems.slice(0, 5).map((w) => (
               <div 
                 key={w.id} 
                 onClick={() => setSelectedWork(w)} 
@@ -481,7 +538,7 @@ export default function App() {
                 Назад
               </button>
               <div className="text-[16px] font-bold text-[#EF6D12]">Все работы</div>
-              <a href="tel:+79668591206" className="text-[14px] font-semibold hover:text-[#EF6D12] transition">+7 (966) 859-12-06</a>
+              <a href={`tel:${sitePhone}`} className="text-[14px] font-semibold hover:text-[#EF6D12] transition">{sitePhoneDisplay}</a>
             </div>
           </div>
 
@@ -504,7 +561,7 @@ export default function App() {
 
             {/* Сетка работ */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-              {worksData.map((w) => (
+              {workItems.map((w) => (
                   <div 
                     key={w.id} 
                     onClick={() => setSelectedWork(w)} 
@@ -537,7 +594,7 @@ export default function App() {
             </div>
 
 
-            <div className="mt-10 text-center"><a href="tel:+79668591206" className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить по вопросу проекта</a></div>
+            <div className="mt-10 text-center"><a href={`tel:${sitePhone}`} className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить по вопросу проекта</a></div>
           </div>
         </div>
       )}
@@ -668,11 +725,7 @@ export default function App() {
       <section className="bg-[#F5F7FA] py-10 lg:py-14">
         <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
           <div className="grid lg:grid-cols-3 gap-4">
-            {[
-              { n: '01', t: 'Монтаж фасада под ключ', d: 'Подсистема, утеплитель, плитка, затирка. Бригада 4 чел, от 80 м² за 5 дней.' },
-              { n: '02', t: 'Укладка брусчатки', d: 'Подготовка основания, геотекстиль, вибротрамбовка. Гарантия на просадку 2 года.' },
-              { n: '03', t: 'Бесплатный замер и 3D-визуализация', d: 'Выезд инженера по СПб бесплатно, покажем как будет выглядеть ваш дом.' },
-            ].map(s=>(
+            {serviceItems.map(s=>(
               <div key={s.n} className="bg-white rounded-[8px] p-6 border border-gray-100 hover:shadow-[0_8px_24px_rgba(0,0,0,.06)] transition group">
                 <div className="flex justify-between items-start">
                   <div className="text-[44px] font-black leading-none text-[#EEF1F5] group-hover:text-[#FFF0E6] transition">{s.n}</div>
@@ -688,6 +741,27 @@ export default function App() {
         </div>
       </section>
 
+      <section id="prices" className="bg-white py-12 lg:py-16 border-t border-gray-100">
+          <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
+            <h2 className="text-[26px] lg:text-[34px] font-black">Прайс-лист</h2>
+            <p className="mt-2 text-sm text-[#5A667A]">Уточняйте наличие и итоговую стоимость по телефону.</p>
+            {priceItems.length > 0 ? (
+              <div className="mt-7 overflow-x-auto rounded-lg border border-gray-100">
+                <table className="w-full min-w-[520px] text-left text-sm">
+                  <thead className="bg-[#F5F7FA] text-[#5A667A]"><tr><th className="px-4 py-3">Наименование</th><th className="px-4 py-3">Категория</th><th className="px-4 py-3">Стоимость</th></tr></thead>
+                  <tbody>{priceItems.map(item => <tr key={item.id} className="border-t border-gray-100"><td className="px-4 py-4 font-semibold">{item.title}{item.description && <div className="mt-1 text-xs font-normal text-[#8A96A8]">{item.description}</div>}</td><td className="px-4 py-4 text-[#5A667A]">{item.category || '—'}</td><td className="px-4 py-4 font-bold text-[#EF6D12]">{item.price ? `${Number(item.price).toLocaleString('ru-RU')} ₽` : 'По запросу'}{item.unit ? ` / ${item.unit}` : ''}</td></tr>)}</tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="mt-7 rounded-lg border border-dashed border-gray-300 bg-[#F7F9FB] px-6 py-8 text-center">
+                <div className="text-base font-semibold text-[#212832]">Стоимость уточняйте у менеджера</div>
+                <p className="mt-2 text-sm text-[#5A667A]">Актуальные цены на продукцию и услуги можно узнать по телефону.</p>
+                <a href={`tel:${sitePhone}`} className="mt-4 inline-flex rounded-md bg-[#EF6D12] px-5 py-3 text-sm font-semibold text-white">{sitePhoneDisplay}</a>
+              </div>
+            )}
+          </div>
+        </section>
+
       {/* Contacts */}
       <section id="contacts" className="bg-white py-10 lg:py-16 border-t">
         <div className="mx-auto max-w-[1440px] px-4 lg:px-8 grid lg:grid-cols-[1fr_440px] gap-10">
@@ -700,8 +774,8 @@ export default function App() {
               </div>
               <div>
                 <div className="text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">Телефон и почта</div>
-                <a href="tel:+79668591206" className="block text-[18px] font-bold">+7 (966) 859-12-06</a>
-                <a href="mailto:info@bioplit.ru" className="text-[14px] text-[#EF6D12] font-medium">info@bioplit.ru</a>
+                <a href={`tel:${sitePhone}`} className="block text-[18px] font-bold">{sitePhoneDisplay}</a>
+                <a href={`mailto:${siteEmail}`} className="text-[14px] text-[#EF6D12] font-medium">{siteEmail}</a>
                 <div className="text-[13px] text-gray-500 mt-1">Пн-Сб 9:00-19:00, Вс - по записи</div>
               </div>
             </div>
@@ -722,7 +796,7 @@ export default function App() {
             </div>
           </div>
 
-          <aside className="bg-[#F7F9FB] rounded-[12px] p-6 lg:p-7 border border-gray-100 h-fit"><div className="text-[18px] font-bold leading-tight">Свяжитесь с нами напрямую</div><p className="text-[13px] text-[#5A667A] mt-2">Позвоните или напишите нам — ответим на вопросы о продукции, наличии и доставке.</p><a href="tel:+79668591206" className="mt-5 flex items-center justify-center min-h-[48px] px-5 bg-[#EF6D12] text-white font-semibold rounded-[4px] text-[14px]">+7 (966) 859-12-06</a><a href="mailto:info@bioplit.ru" className="mt-3 block text-center text-[14px] font-semibold text-[#EF6D12]">info@bioplit.ru</a><p className="mt-5 text-[12px] text-gray-500">Санкт-Петербург и Ленинградская область</p></aside>
+          <aside className="bg-[#F7F9FB] rounded-[12px] p-6 lg:p-7 border border-gray-100 h-fit"><div className="text-[18px] font-bold leading-tight">Свяжитесь с нами напрямую</div><p className="text-[13px] text-[#5A667A] mt-2">Позвоните или напишите нам — ответим на вопросы о продукции, наличии и доставке.</p><a href={`tel:${sitePhone}`} className="mt-5 flex items-center justify-center min-h-[48px] px-5 bg-[#EF6D12] text-white font-semibold rounded-[4px] text-[14px]">{sitePhoneDisplay}</a><a href={`mailto:${siteEmail}`} className="mt-3 block text-center text-[14px] font-semibold text-[#EF6D12]">{siteEmail}</a><p className="mt-5 text-[12px] text-gray-500">Санкт-Петербург и Ленинградская область</p></aside>
         </div>
       </section>
 
@@ -744,7 +818,7 @@ export default function App() {
               <div>
                 <div className="font-bold text-white mb-3">Каталог</div>
                 <div className="space-y-2 opacity-70">
-                  {catalog.map(c=> <div key={c.id} onClick={() => openCategory(c)} className="hover:text-white cursor-pointer hover:opacity-100 transition">{c.titleShort}</div>)}
+                  {catalogItems.map(c=> <div key={c.id} onClick={() => openCategory(c)} className="hover:text-white cursor-pointer hover:opacity-100 transition">{c.titleShort}</div>)}
                 </div>
               </div>
               <div>
@@ -758,7 +832,7 @@ export default function App() {
               </div>
               <div className="col-span-2 lg:col-span-1">
                 <div className="font-bold text-white mb-3">Связаться</div>
-                <a href="tel:+79668591206" className="text-[18px] font-bold text-white block">+7 (966) 859-12-06</a>
+                <a href={`tel:${sitePhone}`} className="text-[18px] font-bold text-white block">{sitePhoneDisplay}</a>
                 
                 <div className="mt-4 text-[12px] opacity-50">п. Щеглово, Заводская 12<br/>ИНН 7806543210 • ОГРН 1147847273821</div>
               </div>
