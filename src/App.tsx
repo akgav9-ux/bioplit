@@ -39,7 +39,12 @@ type CatalogItem = {
   description?: string;
   price?: string;
   unit?: string;
+  width?: string;
+  length?: string;
+  thickness?: string;
 };
+
+type CatalogProduct = { id: string; title: string; article: string; category: string; description: string; image: string; images: string[]; price: string; unit: string; width?: string; length?: string; thickness?: string };
 
 const defaultCatalog: CatalogItem[] = [
   {
@@ -129,7 +134,7 @@ const defaultWorksData: WorkItem[] = worksImages.map((img, index) => ({
 export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(defaultCatalog);
-  const [catalogProducts, setCatalogProducts] = useState<Array<{ id: string; title: string; article: string; category: string; description: string; image: string; price: string; unit: string }>>([]);
+  const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[]>([]);
   const [workItems, setWorkItems] = useState<WorkItem[]>(defaultWorksData);
   const [priceItems, setPriceItems] = useState<Array<{ id: string; title: string; category: string; price: string; unit: string; description: string }>>([
     { id: 'sample-1', title: 'Фасадная плитка', category: 'Фасадная плитка и камень', price: '2400', unit: 'м²', description: 'Предварительная цена за квадратный метр' },
@@ -149,6 +154,9 @@ export default function App() {
   ]);
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CatalogItem | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<CatalogProduct | CatalogItem | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [showAllWorks, setShowAllWorks] = useState(false);
   const [selectedWork, setSelectedWork] = useState<WorkItem | null>(null);
 
@@ -164,10 +172,11 @@ export default function App() {
           categoryKey: String(row.category || ''),
           image: String(row.image_url || FALLBACK_SVG),
           fallback: FALLBACK_SVG,
-          images: row.image_url ? [String(row.image_url)] : [],
+          images: Array.isArray(row.images) ? row.images.map(String).slice(0, 5) : row.image_url ? [String(row.image_url)] : [],
           description: String(row.description || ''),
           price: String(row.price ?? ''),
           unit: String(row.unit || ''),
+          width: String(row.width ?? ''), length: String(row.length ?? ''), thickness: String(row.thickness ?? ''),
         })));
         if (productRows.length) setCatalogProducts(productRows.map((row, index) => ({
           id: String(row.id || index),
@@ -175,9 +184,11 @@ export default function App() {
           article: String(row.article || ''),
           category: String(row.category || ''),
           description: String(row.description || ''),
-          image: String(row.image_url || FALLBACK_SVG),
+          image: String(row.image_url || (Array.isArray(row.images) ? row.images[0] : '') || FALLBACK_SVG),
+          images: Array.isArray(row.images) ? row.images.map(String).slice(0, 5) : row.image_url ? [String(row.image_url)] : [],
           price: String(row.price ?? ''),
           unit: String(row.unit || ''),
+          width: String(row.width ?? ''), length: String(row.length ?? ''), thickness: String(row.thickness ?? ''),
         })));
         if (workRows.length) setWorkItems(workRows.map((row, index) => ({
           id: String(row.id || index),
@@ -218,9 +229,37 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const closeCategory = () => {
-    setSelectedCategory(null);
+  const closeCategory = () => { setSelectedCategory(null); };
+
+  const openProduct = (product: CatalogProduct | CatalogItem) => {
+    setSelectedProduct(product);
+    setGalleryIndex(0);
+    setLightboxOpen(false);
+    const id = encodeURIComponent(String(product.id));
+    if (window.location.pathname !== `/product/${id}`) window.history.pushState({ productId: String(product.id) }, '', `/product/${id}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const closeProduct = () => {
+    setLightboxOpen(false);
+    if (window.location.pathname.startsWith('/product/')) window.history.back();
+    else setSelectedProduct(null);
+  };
+
+  useEffect(() => {
+    const handleBack = () => { setSelectedProduct(null); setLightboxOpen(false); };
+    window.addEventListener('popstate', handleBack);
+    return () => window.removeEventListener('popstate', handleBack);
+  }, []);
+
+  useEffect(() => {
+    if (selectedProduct) return;
+    const match = window.location.pathname.match(/^\/product\/([^/]+)\/?$/);
+    if (!match) return;
+    const id = decodeURIComponent(match[1]);
+    const product = [...catalogProducts, ...catalogItems].find(item => item.id === id);
+    if (product) setSelectedProduct(product);
+  }, [catalogProducts, catalogItems, selectedProduct]);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, fallback: string) => {
     const img = e.target as HTMLImageElement;
@@ -384,7 +423,7 @@ export default function App() {
             {selectedCategory.categoryKey && catalogProducts.some(product => product.category === selectedCategory.categoryKey) ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
                 {catalogProducts.filter(product => product.category === selectedCategory.categoryKey).map(product => (
-                  <article key={product.id} className="bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100">
+                  <article key={product.id} onClick={() => openProduct(product)} role="button" tabIndex={0} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') openProduct(product); }} className="bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100 cursor-pointer hover:shadow-lg transition">
                     <div className="aspect-[4/3] overflow-hidden bg-[#E8ECF0]">
                       <img src={product.image} alt={product.title} className="w-full h-full object-cover" onError={(e) => handleImageError(e, selectedCategory.fallback)} />
                     </div>
@@ -400,7 +439,7 @@ export default function App() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
                 {selectedCategory.images.map((img, i) => (
-                  <div key={i} className="group bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100">
+                  <div key={i} onClick={() => openProduct({ ...selectedCategory, id: `${selectedCategory.id}-${i}`, titleShort: selectedCategory.titleShort || `Модель #${i + 1}`, image: img })} role="button" tabIndex={0} className="group bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100 cursor-pointer hover:shadow-lg transition">
                     <div className="aspect-[4/3] overflow-hidden bg-[#E8ECF0]">
                       <img src={img} alt={`${selectedCategory.titleShort} ${i + 1}`} className="w-full h-full object-cover" onError={(e) => handleImageError(e, selectedCategory.fallback)} />
                     </div>
@@ -416,6 +455,38 @@ export default function App() {
 
             <div className="mt-10 text-center"><a href={`tel:${sitePhone}`} className="inline-flex h-[52px] px-8 items-center bg-[#EF6D12] text-white font-semibold rounded-[6px]">Позвонить и уточнить наличие</a><p className="text-[13px] text-gray-400 mt-3">Поможем с выбором и ответим на вопросы</p></div>
           </div>
+        </div>
+      )}
+
+
+      {selectedProduct && (
+        <div className="fixed inset-0 z-[120] bg-white overflow-y-auto">
+          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-gray-100"><div className="mx-auto max-w-6xl h-16 px-4 flex items-center justify-between gap-3">
+            <button onClick={closeProduct} className="font-semibold text-[#263142] hover:text-[#EF6D12]">← Назад к каталогу</button><span className="text-sm font-bold text-[#EF6D12]">БИОПЛИТ</span><a href={`tel:${sitePhone}`} className="text-sm font-semibold">{sitePhoneDisplay}</a>
+          </div></div>
+          <div className="mx-auto max-w-6xl px-4 py-6 lg:py-10 grid lg:grid-cols-2 gap-8">
+            <div>
+              <button onClick={() => setLightboxOpen(true)} className="w-full aspect-[4/3] bg-[#F2F4F6] rounded-xl overflow-hidden grid place-items-center"><img src={selectedProduct.images?.[galleryIndex] || selectedProduct.image || FALLBACK_SVG} alt={selectedProduct.title || selectedProduct.titleShort} className="w-full h-full object-contain" /></button>
+              {(selectedProduct.images?.length || 0)>1 && <div className="mt-3 flex gap-2 overflow-x-auto">{selectedProduct.images.slice(0,5).map((src,index)=><button key={src+index} onClick={()=>setGalleryIndex(index)} className={`w-20 h-20 shrink-0 rounded-lg overflow-hidden border-2 ${galleryIndex===index?'border-[#EF6D12]':'border-transparent'}`}><img src={src} alt={`Фото ${index+1}`} className="w-full h-full object-cover"/></button>)}</div>}
+              <div className="mt-3 flex items-center justify-between"><button disabled={galleryIndex===0} onClick={()=>setGalleryIndex(i=>Math.max(0,i-1))} className="px-4 py-2 rounded-lg border disabled:opacity-30">← Предыдущее</button><span className="text-sm text-slate-500">{galleryIndex+1} / {Math.max(1,selectedProduct.images?.length||1)}</span><button disabled={galleryIndex>=(selectedProduct.images?.length||1)-1} onClick={()=>setGalleryIndex(i=>Math.min((selectedProduct.images?.length||1)-1,i+1))} className="px-4 py-2 rounded-lg border disabled:opacity-30">Следующее →</button></div>
+            </div>
+            <div>
+              <h1 className="text-2xl lg:text-4xl font-black text-[#202938]">{selectedProduct.title || selectedProduct.titleShort}</h1>
+              {'article' in selectedProduct && selectedProduct.article && <p className="mt-2 text-sm text-slate-500">Артикул: {selectedProduct.article}</p>}
+              <div className="mt-5 text-2xl font-black text-[#EF6D12]">{selectedProduct.price ? `${Number(selectedProduct.price).toLocaleString('ru-RU')} ₽${selectedProduct.unit ? ` / ${selectedProduct.unit}` : ''}` : 'Цена уточняется'}</div>
+              <section className="mt-7"><h2 className="text-lg font-bold">Описание</h2><p className="mt-2 text-[15px] leading-7 text-slate-600 whitespace-pre-line">{selectedProduct.description || 'Описание товара пока не добавлено.'}</p></section>
+              <section className="mt-7"><h2 className="text-lg font-bold">Размеры и характеристики</h2><div className="mt-3 divide-y rounded-xl border border-slate-200">
+                {([['Ширина',selectedProduct.width],['Длина',selectedProduct.length],['Толщина',selectedProduct.thickness]] as Array<[string,string|undefined]>).map(([label,value])=><div key={label} className="flex justify-between gap-4 px-4 py-3 text-sm"><span className="text-slate-500">{label}</span><strong>{value || 'Не указано'}</strong></div>)}
+              </div></section>
+              <a href={`tel:${sitePhone}`} className="mt-8 inline-flex rounded-lg bg-[#EF6D12] px-6 py-4 font-bold text-white">Уточнить наличие и заказать</a>
+            </div>
+          </div>
+          {lightboxOpen && <div className="fixed inset-0 z-[150] bg-black/95 p-4 flex items-center justify-center" onClick={()=>setLightboxOpen(false)}>
+            <button onClick={()=>setLightboxOpen(false)} className="absolute right-5 top-5 text-white text-3xl" aria-label="Закрыть">×</button>
+            <button onClick={e=>{e.stopPropagation();setGalleryIndex(i=>Math.max(0,i-1));}} className="absolute left-3 sm:left-8 text-white text-3xl disabled:opacity-30" disabled={galleryIndex===0}>‹</button>
+            <img src={selectedProduct.images?.[galleryIndex] || selectedProduct.image || FALLBACK_SVG} alt="Увеличенное фото товара" className="max-h-[90vh] max-w-[88vw] object-contain" onClick={e=>e.stopPropagation()}/>
+            <button onClick={e=>{e.stopPropagation();setGalleryIndex(i=>Math.min((selectedProduct.images?.length||1)-1,i+1));}} className="absolute right-3 sm:right-8 text-white text-3xl disabled:opacity-30" disabled={galleryIndex>=(selectedProduct.images?.length||1)-1}>›</button>
+          </div>}
         </div>
       )}
 
