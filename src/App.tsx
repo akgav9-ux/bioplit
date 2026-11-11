@@ -36,6 +36,9 @@ type CatalogItem = {
   image: string;
   fallback: string;
   images: string[];
+  description?: string;
+  price?: string;
+  unit?: string;
 };
 
 const defaultCatalog: CatalogItem[] = [
@@ -162,6 +165,9 @@ export default function App() {
           image: String(row.image_url || FALLBACK_SVG),
           fallback: FALLBACK_SVG,
           images: row.image_url ? [String(row.image_url)] : [],
+          description: String(row.description || ''),
+          price: String(row.price ?? ''),
+          unit: String(row.unit || ''),
         })));
         if (productRows.length) setCatalogProducts(productRows.map((row, index) => ({
           id: String(row.id || index),
@@ -375,7 +381,7 @@ export default function App() {
             </p>
             <p className="mt-2 text-[12px] text-[#8A96A8]">Цены демонстрационные, предварительные. Актуальную стоимость уточняйте у менеджера.</p>
 
-            {catalogProducts.some(product => product.category === selectedCategory.categoryKey) ? (
+            {selectedCategory.categoryKey && catalogProducts.some(product => product.category === selectedCategory.categoryKey) ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
                 {catalogProducts.filter(product => product.category === selectedCategory.categoryKey).map(product => (
                   <article key={product.id} className="bg-[#F6F8FA] rounded-[8px] overflow-hidden border border-gray-100">
@@ -399,9 +405,9 @@ export default function App() {
                       <img src={img} alt={`${selectedCategory.titleShort} ${i + 1}`} className="w-full h-full object-cover" onError={(e) => handleImageError(e, selectedCategory.fallback)} />
                     </div>
                     <div className="p-3">
-                      <div className="text-[13px] font-semibold">Модель #{i + 1}</div>
-                      <div className="text-[12px] text-[#5A667A]">Артикул: {selectedCategory.id.toUpperCase()}-{String(i + 1).padStart(3, '0')}</div>
-                      <div className="mt-2 text-[13px] font-bold text-[#EF6D12]">Цена уточняется</div>
+                      <div className="text-[13px] font-semibold">{selectedCategory.titleShort || `Модель #${i + 1}`}</div>
+                      {selectedCategory.description && <p className="mt-2 text-[12px] text-[#5A667A]">{selectedCategory.description}</p>}
+                      <div className="mt-2 text-[13px] font-bold text-[#EF6D12]">{selectedCategory.price ? `${Number(selectedCategory.price).toLocaleString('ru-RU')} ₽${selectedCategory.unit ? ` / ${selectedCategory.unit}` : ''}` : 'Цена уточняется'}</div>
                     </div>
                   </div>
                 ))}
