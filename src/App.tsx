@@ -369,6 +369,7 @@ export default function App() {
             <p className="text-[16px] text-[#5A667A] mt-2 max-w-[600px]">
               Выберите подходящий вариант из нашего каталога. Все материалы в наличии на складе в СПб.
             </p>
+            <p className="mt-2 text-[12px] text-[#8A96A8]">Цены демонстрационные, предварительные. Актуальную стоимость уточняйте у менеджера.</p>
 
             {catalogProducts.some(product => product.category === selectedCategory.categoryKey) ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
