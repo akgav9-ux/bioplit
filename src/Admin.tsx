@@ -72,6 +72,7 @@ export default function AdminPanel() {
   const [rows, setRows] = useState<Row[]>([]);
   const [editing, setEditing] = useState<Row | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -79,6 +80,13 @@ export default function AdminPanel() {
   const [resetSent, setResetSent] = useState(false);
 
   const section = useMemo(() => sections.find(item => item.id === active) || sections[0], [active]);
+
+  useEffect(() => {
+    if (!imageFile) { setImagePreview(''); return; }
+    const preview = URL.createObjectURL(imageFile);
+    setImagePreview(preview);
+    return () => URL.revokeObjectURL(preview);
+  }, [imageFile]);
 
   const load = useCallback(async (current: AdminSession, selected: Section) => {
     const data = await listRows(selected.table, current);
@@ -141,7 +149,7 @@ export default function AdminPanel() {
 
   function startEdit(row?: Row) {
     setEditing(row ? { ...row } : blankRow(section));
-    setImageFile(null); setError(''); setNotice('');
+    setImageFile(null); setImagePreview(''); setError(''); setNotice('');
   }
 
   async function handleSave(event: React.FormEvent) {
@@ -152,7 +160,7 @@ export default function AdminPanel() {
       const next = { ...editing };
       if (imageFile) next.image_url = await uploadImage(imageFile, session);
       await saveRow(section.table, next, session);
-      setEditing(null); setImageFile(null);
+      setEditing(null); setImageFile(null); setImagePreview('');
       await load(session, section);
       setNotice('Изменения сохранены');
     } catch (e) { setError(e instanceof Error ? e.message : 'Не удалось сохранить'); }
@@ -230,14 +238,26 @@ export default function AdminPanel() {
             <form onSubmit={handleSave} className="mt-6 rounded-xl border border-orange-200 bg-orange-50/40 p-4">
               <h2 className="mb-4 font-bold">{editing.id ? 'Редактирование записи' : 'Новая запись'}</h2>
               <div className="grid gap-4 sm:grid-cols-2">
-                {section.fields.map(field => <label key={field.key} className={field.type === 'textarea' ? 'sm:col-span-2' : ''}>
+                {section.fields.filter(field => field.key !== 'image_url').map(field => <label key={field.key} className={field.type === 'textarea' ? 'sm:col-span-2' : ''}>
                   <span className="mb-1 block text-sm font-semibold text-slate-700">{field.label}</span>
                   {field.type === 'checkbox' ? <input type="checkbox" checked={Boolean(editing[field.key])} onChange={e => updateField(field.key, e.target.checked)} className="h-5 w-5 accent-orange-600" />
                     : field.type === 'textarea' ? <textarea value={String(editing[field.key] ?? '')} onChange={e => updateField(field.key, e.target.value)} rows={3} className="w-full rounded-lg border border-slate-300 bg-white p-3" />
                     : field.type === 'select' ? <select required={field.required} value={String(editing[field.key] ?? '')} onChange={e => updateField(field.key, e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white p-3"><option value="">Выберите категорию</option>{(field.options || []).map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
                     : <input type={field.type === 'number' ? 'number' : field.type === 'url' ? 'url' : 'text'} required={field.required} value={String(editing[field.key] ?? '')} onChange={e => updateField(field.key, field.type === 'number' ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white p-3" />}
                 </label>)}
-                {section.fields.some(field => field.key === 'image_url') && <label className="sm:col-span-2"><span className="mb-1 block text-sm font-semibold text-slate-700">Загрузить новое фото</span><input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} className="block w-full text-sm" /><span className="mt-1 block text-xs text-slate-500">Фото загрузится в защищённое хранилище сайта после сохранения.</span></label>}
+                {section.fields.some(field => field.key === 'image_url') && <div className="sm:col-span-2 rounded-xl border border-dashed border-orange-300 bg-white p-4">
+                  <div className="text-sm font-bold text-slate-800">Фотография</div>
+                  <p className="mt-1 text-xs text-slate-500">Выберите фото прямо с телефона или компьютера. Ссылки на изображения вводить не нужно. Максимальный размер — 10 МБ.</p>
+                  {(imagePreview || editing.image_url) && <img src={imagePreview || String(editing.image_url)} alt="Предпросмотр фотографии" className="mt-3 max-h-56 max-w-full rounded-lg object-contain" />}
+                  <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={e => {
+                    const file = e.target.files?.[0] || null;
+                    if (file && !['image/jpeg','image/png','image/webp','image/avif'].includes(file.type)) { setError('Выберите изображение JPG, PNG, WEBP или AVIF.'); e.target.value = ''; return; }
+                    if (file && file.size > 10 * 1024 * 1024) { setError('Файл слишком большой. Максимальный размер — 10 МБ.'); e.target.value = ''; return; }
+                    setError(''); setImageFile(file);
+                  }} className="mt-3 block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-orange-600 file:px-4 file:py-2 file:font-semibold file:text-white" />
+                  {imageFile && <div className="mt-2 flex items-center gap-3 text-xs text-slate-600"><span className="min-w-0 flex-1 truncate">{imageFile.name}</span><button type="button" onClick={() => setImageFile(null)} className="font-semibold text-red-600">Отменить выбор</button></div>}
+                  <p className="mt-2 text-xs text-slate-500">{imageFile ? 'Новое фото загрузится при нажатии «Сохранить».' : editing.image_url ? 'Сейчас используется это фото. Выберите файл, чтобы заменить его.' : 'Фото пока не выбрано.'}</p>
+                </div>}
               </div>
               <div className="mt-5 flex flex-wrap gap-2"><button disabled={busy} className="rounded-lg bg-orange-600 px-5 py-2.5 font-bold text-white disabled:opacity-50">{busy ? 'Сохраняем…' : 'Сохранить'}</button><button type="button" onClick={() => setEditing(null)} className="rounded-lg border border-slate-300 px-5 py-2.5 font-semibold">Отмена</button></div>
             </form>
