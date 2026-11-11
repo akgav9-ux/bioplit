@@ -160,10 +160,11 @@ export async function updateAccountPassword(session: AdminSession, password: str
 
 export async function sendPasswordReset(email: string) {
   const { url, key } = config();
-  const response = await fetch(`${url}/auth/v1/recover`, {
+  const endpoint = `${url}/auth/v1/` + 'recover' + `?redirect_to=${encodeURIComponent(window.location.origin + '/admin')}`;
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: { apikey: key, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, redirect_to: `${window.location.origin}/admin` }),
+    body: JSON.stringify({ email }),
   });
   if (!response.ok) {
     const data = await response.json().catch(() => ({})) as Record<string, unknown>;
