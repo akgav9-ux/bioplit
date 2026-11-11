@@ -13,7 +13,7 @@ const sections: Section[] = [
     { key: 'title', label: 'Название', required: true }, { key: 'title_short', label: 'Короткое название' },
     { key: 'category', label: 'Категория' }, { key: 'description', label: 'Описание', type: 'textarea' },
     { key: 'image_url', label: 'Фото (URL)' }, { key: 'price', label: 'Цена', type: 'number' },
-    { key: 'unit', label: 'Единица измерения' }, { key: 'width', label: 'Ширина' }, { key: 'length', label: 'Длина' }, { key: 'thickness', label: 'Толщина' }, { key: 'sort_order', label: 'Порядок', type: 'number' },
+    { key: 'unit', label: 'Единица измерения' }, { key: 'width', label: 'Ширина (мм)' }, { key: 'length', label: 'Длина (мм)' }, { key: 'thickness', label: 'Толщина (мм)' }, { key: 'sort_order', label: 'Порядок', type: 'number' },
     { key: 'is_active', label: 'Показывать на сайте', type: 'checkbox' },
   ]},
   { id: 'products', title: 'Товары каталога', table: 'catalog_products', fields: [
@@ -31,7 +31,7 @@ const sections: Section[] = [
     { key: 'image_url', label: 'Фото (URL)' },
     { key: 'price', label: 'Цена', type: 'number' },
     { key: 'unit', label: 'Единица измерения' },
-    { key: 'width', label: 'Ширина' }, { key: 'length', label: 'Длина' }, { key: 'thickness', label: 'Толщина' },
+    { key: 'width', label: 'Ширина (мм)' }, { key: 'length', label: 'Длина (мм)' }, { key: 'thickness', label: 'Толщина (мм)' },
     { key: 'sort_order', label: 'Порядок', type: 'number' },
     { key: 'is_active', label: 'Показывать на сайте', type: 'checkbox' },
   ]},
