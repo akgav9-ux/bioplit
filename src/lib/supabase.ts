@@ -140,3 +140,7 @@ export async function uploadImage(file: File, session: AdminSession) {
   }
   return `${url}/storage/v1/object/public/site-media/${path}`;
 }
+
+export async function publicRows(table: string) {
+  return await request(`/rest/v1/${table}?select=*&is_active=eq.true&order=sort_order.asc,created_at.desc`) as Record<string, unknown>[];
+}
