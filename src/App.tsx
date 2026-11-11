@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminPanel from './Admin';
+import PasswordRecovery from './PasswordRecovery';
 import { publicRows } from './lib/supabase';
 import { Player } from '@barabel324/react-player';
 import '@barabel324/react-player/css';
@@ -222,6 +223,9 @@ export default function App() {
     }
   };
 
+  const recoveryHash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const recoveryQuery = new URLSearchParams(window.location.search);
+  if (recoveryHash.get('type') === 'recovery' || recoveryQuery.has('token_hash') || recoveryQuery.has('error_description') || window.location.pathname.replace(/\/+$/, '') === '/reset-password') return <PasswordRecovery />;
   if (window.location.pathname.replace(/\/+$/, '') === '/admin') return <AdminPanel />;
 
   return (
