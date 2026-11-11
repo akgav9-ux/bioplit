@@ -195,7 +195,7 @@ export default function AdminPanel() {
             <table className="w-full min-w-[650px] text-left text-sm">
               <thead><tr className="border-b border-slate-200 text-xs uppercase text-slate-500"><th className="px-3 py-3">Название / ключ</th><th className="px-3 py-3">Описание / данные</th><th className="px-3 py-3">Статус</th><th className="px-3 py-3 text-right">Действия</th></tr></thead>
               <tbody>{rows.map((row, index) => <tr key={String(row.id || index)} className="border-b border-slate-100">
-                <td className="px-3 py-4 font-semibold">{String(row.title || row.key || 'Без названия')}{row.image_url && <img src={String(row.image_url)} alt="" className="mt-2 h-12 w-16 rounded object-cover" />}</td>
+                <td className="px-3 py-4 font-semibold">{String(row.title || row.key || 'Без названия')}{Boolean(row.image_url) && <img src={String(row.image_url)} alt="" className="mt-2 h-12 w-16 rounded object-cover" />}</td>
                 <td className="max-w-sm px-3 py-4 text-slate-500">{String(row.description || row.value || (row.price != null ? `${row.price} ${row.unit || ''}` : '—')).slice(0, 110)}</td>
                 <td className="px-3 py-4">{row.is_active === false ? <span className="text-slate-400">Скрыто</span> : <span className="text-emerald-700">Активно</span>}</td>
                 <td className="px-3 py-4 text-right whitespace-nowrap"><button onClick={() => startEdit(row)} className="rounded-md px-3 py-2 font-semibold text-orange-700 hover:bg-orange-50">Изменить</button><button onClick={() => handleDelete(row)} className="rounded-md px-3 py-2 font-semibold text-red-600 hover:bg-red-50">Удалить</button></td>
