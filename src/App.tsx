@@ -270,6 +270,7 @@ export default function App() {
                 <div className="px-4 py-2 text-[13px] hover:bg-gray-50 rounded">Доставка и расчет</div>
               </div>
             </div>
+            <button onClick={()=>scrollTo('prices')} className="hover:text-[#EF6D12] transition">Цены</button>
             <button onClick={()=>scrollTo('works')} className="hover:text-[#EF6D12] transition">Наши работы</button>
             <button onClick={()=>scrollTo('about')} className="hover:text-[#EF6D12] transition">О компании</button>
             <button onClick={()=>scrollTo('contacts')} className="hover:text-[#EF6D12] transition">Контакты</button>
@@ -302,6 +303,7 @@ export default function App() {
                 </div>
               </div>
               <div className="space-y-3 pt-4 border-t">
+                <button onClick={()=>scrollTo('prices')} className="block text-[16px] font-medium">Цены</button>
                 <button onClick={()=>scrollTo('works')} className="block text-[16px] font-medium">Наши работы</button>
                 <button onClick={()=>scrollTo('about')} className="block text-[16px] font-medium">О компании</button>
                 <button onClick={()=>scrollTo('contacts')} className="block text-[16px] font-medium">Контакты</button>
@@ -739,20 +741,26 @@ export default function App() {
         </div>
       </section>
 
-      {priceItems.length > 0 && (
-        <section id="prices" className="bg-white py-12 lg:py-16 border-t border-gray-100">
+      <section id="prices" className="bg-white py-12 lg:py-16 border-t border-gray-100">
           <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
             <h2 className="text-[26px] lg:text-[34px] font-black">Прайс-лист</h2>
             <p className="mt-2 text-sm text-[#5A667A]">Уточняйте наличие и итоговую стоимость по телефону.</p>
-            <div className="mt-7 overflow-x-auto rounded-lg border border-gray-100">
-              <table className="w-full min-w-[520px] text-left text-sm">
-                <thead className="bg-[#F5F7FA] text-[#5A667A]"><tr><th className="px-4 py-3">Наименование</th><th className="px-4 py-3">Категория</th><th className="px-4 py-3">Стоимость</th></tr></thead>
-                <tbody>{priceItems.map(item => <tr key={item.id} className="border-t border-gray-100"><td className="px-4 py-4 font-semibold">{item.title}{item.description && <div className="mt-1 text-xs font-normal text-[#8A96A8]">{item.description}</div>}</td><td className="px-4 py-4 text-[#5A667A]">{item.category || '—'}</td><td className="px-4 py-4 font-bold text-[#EF6D12]">{item.price ? `${Number(item.price).toLocaleString('ru-RU')} ₽` : 'По запросу'}{item.unit ? ` / ${item.unit}` : ''}</td></tr>)}</tbody>
-              </table>
-            </div>
+            {priceItems.length > 0 ? (
+              <div className="mt-7 overflow-x-auto rounded-lg border border-gray-100">
+                <table className="w-full min-w-[520px] text-left text-sm">
+                  <thead className="bg-[#F5F7FA] text-[#5A667A]"><tr><th className="px-4 py-3">Наименование</th><th className="px-4 py-3">Категория</th><th className="px-4 py-3">Стоимость</th></tr></thead>
+                  <tbody>{priceItems.map(item => <tr key={item.id} className="border-t border-gray-100"><td className="px-4 py-4 font-semibold">{item.title}{item.description && <div className="mt-1 text-xs font-normal text-[#8A96A8]">{item.description}</div>}</td><td className="px-4 py-4 text-[#5A667A]">{item.category || '—'}</td><td className="px-4 py-4 font-bold text-[#EF6D12]">{item.price ? `${Number(item.price).toLocaleString('ru-RU')} ₽` : 'По запросу'}{item.unit ? ` / ${item.unit}` : ''}</td></tr>)}</tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="mt-7 rounded-lg border border-dashed border-gray-300 bg-[#F7F9FB] px-6 py-8 text-center">
+                <div className="text-base font-semibold text-[#212832]">Стоимость уточняйте у менеджера</div>
+                <p className="mt-2 text-sm text-[#5A667A]">Актуальные цены на продукцию и услуги можно узнать по телефону.</p>
+                <a href={`tel:${sitePhone}`} className="mt-4 inline-flex rounded-md bg-[#EF6D12] px-5 py-3 text-sm font-semibold text-white">{sitePhoneDisplay}</a>
+              </div>
+            )}
           </div>
         </section>
-      )}
 
       {/* Contacts */}
       <section id="contacts" className="bg-white py-10 lg:py-16 border-t">
