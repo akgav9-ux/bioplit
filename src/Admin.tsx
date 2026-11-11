@@ -13,7 +13,7 @@ const sections: Section[] = [
     { key: 'title', label: 'Название', required: true }, { key: 'title_short', label: 'Короткое название' },
     { key: 'category', label: 'Категория' }, { key: 'description', label: 'Описание', type: 'textarea' },
     { key: 'image_url', label: 'Фото (URL)' }, { key: 'price', label: 'Цена', type: 'number' },
-    { key: 'unit', label: 'Единица измерения' }, { key: 'sort_order', label: 'Порядок', type: 'number' },
+    { key: 'unit', label: 'Единица измерения' }, { key: 'width', label: 'Ширина' }, { key: 'length', label: 'Длина' }, { key: 'thickness', label: 'Толщина' }, { key: 'sort_order', label: 'Порядок', type: 'number' },
     { key: 'is_active', label: 'Показывать на сайте', type: 'checkbox' },
   ]},
   { id: 'products', title: 'Товары каталога', table: 'catalog_products', fields: [
@@ -31,6 +31,7 @@ const sections: Section[] = [
     { key: 'image_url', label: 'Фото (URL)' },
     { key: 'price', label: 'Цена', type: 'number' },
     { key: 'unit', label: 'Единица измерения' },
+    { key: 'width', label: 'Ширина' }, { key: 'length', label: 'Длина' }, { key: 'thickness', label: 'Толщина' },
     { key: 'sort_order', label: 'Порядок', type: 'number' },
     { key: 'is_active', label: 'Показывать на сайте', type: 'checkbox' },
   ]},
@@ -71,8 +72,7 @@ export default function AdminPanel() {
   const [active, setActive] = useState('catalog');
   const [rows, setRows] = useState<Row[]>([]);
   const [editing, setEditing] = useState<Row | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -80,13 +80,6 @@ export default function AdminPanel() {
   const [resetSent, setResetSent] = useState(false);
 
   const section = useMemo(() => sections.find(item => item.id === active) || sections[0], [active]);
-
-  useEffect(() => {
-    if (!imageFile) { setImagePreview(''); return; }
-    const preview = URL.createObjectURL(imageFile);
-    setImagePreview(preview);
-    return () => URL.revokeObjectURL(preview);
-  }, [imageFile]);
 
   const load = useCallback(async (current: AdminSession, selected: Section) => {
     const data = await listRows(selected.table, current);
@@ -149,7 +142,7 @@ export default function AdminPanel() {
 
   function startEdit(row?: Row) {
     setEditing(row ? { ...row } : blankRow(section));
-    setImageFile(null); setImagePreview(''); setError(''); setNotice('');
+    setImageFiles([]); setError(''); setNotice('');
   }
 
   async function handleSave(event: React.FormEvent) {
@@ -158,9 +151,12 @@ export default function AdminPanel() {
     setBusy(true); setError('');
     try {
       const next = { ...editing };
-      if (imageFile) next.image_url = await uploadImage(imageFile, session);
+      const existingImages = Array.isArray(next.images) ? next.images as string[] : (next.image_url ? [String(next.image_url)] : []);
+      if (imageFiles.length) next.images = [...existingImages, ...(await Promise.all(imageFiles.map(file => uploadImage(file, session))))].slice(0, 5);
+      else next.images = existingImages.slice(0, 5);
+      if (Array.isArray(next.images) && next.images.length) next.image_url = next.images[0];
       await saveRow(section.table, next, session);
-      setEditing(null); setImageFile(null); setImagePreview('');
+      setEditing(null); setImageFiles([]);
       await load(session, section);
       setNotice('Изменения сохранены');
     } catch (e) { setError(e instanceof Error ? e.message : 'Не удалось сохранить'); }
@@ -246,17 +242,24 @@ export default function AdminPanel() {
                     : <input type={field.type === 'number' ? 'number' : field.type === 'url' ? 'url' : 'text'} required={field.required} value={String(editing[field.key] ?? '')} onChange={e => updateField(field.key, field.type === 'number' ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white p-3" />}
                 </label>)}
                 {section.fields.some(field => field.key === 'image_url') && <div className="sm:col-span-2 rounded-xl border border-dashed border-orange-300 bg-white p-4">
-                  <div className="text-sm font-bold text-slate-800">Фотография</div>
-                  <p className="mt-1 text-xs text-slate-500">Выберите фото прямо с телефона или компьютера. Ссылки на изображения вводить не нужно. Максимальный размер — 10 МБ.</p>
-                  {(imagePreview || editing.image_url) && <img src={imagePreview || String(editing.image_url)} alt="Предпросмотр фотографии" className="mt-3 max-h-56 max-w-full rounded-lg object-contain" />}
-                  <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={e => {
-                    const file = e.target.files?.[0] || null;
-                    if (file && !['image/jpeg','image/png','image/webp','image/avif'].includes(file.type)) { setError('Выберите изображение JPG, PNG, WEBP или AVIF.'); e.target.value = ''; return; }
-                    if (file && file.size > 10 * 1024 * 1024) { setError('Файл слишком большой. Максимальный размер — 10 МБ.'); e.target.value = ''; return; }
-                    setError(''); setImageFile(file);
+                  <div className="text-sm font-bold text-slate-800">Фотографии товара (до 5 штук)</div>
+                  <p className="mt-1 text-xs text-slate-500">Можно выбрать сразу несколько фото. JPG, PNG, WEBP или AVIF, до 10 МБ каждое.</p>
+                  <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-2">
+                    {(Array.isArray(editing.images) ? editing.images as string[] : editing.image_url ? [String(editing.image_url)] : []).map((url,index) => <div key={url+index} className="relative">
+                      <img src={url} alt={`Фото товара ${index+1}`} className="h-24 w-full rounded-lg object-cover border" />
+                      <button type="button" onClick={() => { const current = Array.isArray(editing.images) ? editing.images as string[] : [String(editing.image_url || '')]; const remaining = current.filter((_,i)=>i!==index); updateField('images',remaining); updateField('image_url',remaining[0] || ''); }} className="absolute right-1 top-1 rounded-full bg-red-600 text-white w-6 h-6">×</button>
+                    </div>)}
+                    {imageFiles.map((file,index)=><div key={file.name+index} className="h-24 rounded-lg bg-orange-50 border border-orange-200 p-2 text-xs flex items-center justify-center text-center break-all">{file.name}</div>)}
+                  </div>
+                  <input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" onChange={e => {
+                    const selected = Array.from(e.target.files || []);
+                    const count = (Array.isArray(editing.images) ? editing.images.length : editing.image_url ? 1 : 0) + imageFiles.length;
+                    if (count + selected.length > 5) { setError('Можно добавить не более 5 фотографий.'); e.target.value=''; return; }
+                    const invalid = selected.find(file => !['image/jpeg','image/png','image/webp','image/avif'].includes(file.type) || file.size > 10*1024*1024);
+                    if (invalid) { setError('Допустимы JPG, PNG, WEBP или AVIF до 10 МБ каждое.'); e.target.value=''; return; }
+                    setError(''); setImageFiles(previous=>[...previous,...selected]);
                   }} className="mt-3 block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-orange-600 file:px-4 file:py-2 file:font-semibold file:text-white" />
-                  {imageFile && <div className="mt-2 flex items-center gap-3 text-xs text-slate-600"><span className="min-w-0 flex-1 truncate">{imageFile.name}</span><button type="button" onClick={() => setImageFile(null)} className="font-semibold text-red-600">Отменить выбор</button></div>}
-                  <p className="mt-2 text-xs text-slate-500">{imageFile ? 'Новое фото загрузится при нажатии «Сохранить».' : editing.image_url ? 'Сейчас используется это фото. Выберите файл, чтобы заменить его.' : 'Фото пока не выбрано.'}</p>
+                  {imageFiles.length>0 && <button type="button" onClick={()=>setImageFiles([])} className="mt-2 text-xs font-semibold text-red-600">Отменить новые фото</button>}
                 </div>}
               </div>
               <div className="mt-5 flex flex-wrap gap-2"><button disabled={busy} className="rounded-lg bg-orange-600 px-5 py-2.5 font-bold text-white disabled:opacity-50">{busy ? 'Сохраняем…' : 'Сохранить'}</button><button type="button" onClick={() => setEditing(null)} className="rounded-lg border border-slate-300 px-5 py-2.5 font-semibold">Отмена</button></div>
