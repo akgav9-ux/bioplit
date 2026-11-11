@@ -5,7 +5,7 @@ import {
 } from './lib/supabase';
 
 type Row = Record<string, unknown>;
-type Field = { key: string; label: string; type?: 'text' | 'textarea' | 'number' | 'url' | 'checkbox'; required?: boolean };
+type Field = { key: string; label: string; type?: 'text' | 'textarea' | 'number' | 'url' | 'checkbox' | 'select'; required?: boolean; options?: Array<{ value: string; label: string }> };
 type Section = { id: string; title: string; table: string; fields: Field[] };
 
 const sections: Section[] = [
@@ -14,6 +14,24 @@ const sections: Section[] = [
     { key: 'category', label: 'Категория' }, { key: 'description', label: 'Описание', type: 'textarea' },
     { key: 'image_url', label: 'Фото (URL)' }, { key: 'price', label: 'Цена', type: 'number' },
     { key: 'unit', label: 'Единица измерения' }, { key: 'sort_order', label: 'Порядок', type: 'number' },
+    { key: 'is_active', label: 'Показывать на сайте', type: 'checkbox' },
+  ]},
+  { id: 'products', title: 'Товары каталога', table: 'catalog_products', fields: [
+    { key: 'title', label: 'Название товара', required: true },
+    { key: 'article', label: 'Артикул' },
+    { key: 'category', label: 'Категория', type: 'select', required: true, options: [
+      { value: 'facade', label: 'Фасадная плитка и камень' },
+      { value: 'cokol', label: 'Цокольные панели' },
+      { value: 'brus', label: 'Брусчатка и тротуарная плитка' },
+      { value: 'tactile', label: 'Тактильная плитка' },
+      { value: 'bord', label: 'Бордюры и водостоки' },
+      { value: 'vazon', label: 'Цветочные вазоны' },
+    ]},
+    { key: 'description', label: 'Описание', type: 'textarea' },
+    { key: 'image_url', label: 'Фото (URL)' },
+    { key: 'price', label: 'Индивидуальная цена', type: 'number' },
+    { key: 'unit', label: 'Единица измерения (м², шт.)' },
+    { key: 'sort_order', label: 'Порядок', type: 'number' },
     { key: 'is_active', label: 'Показывать на сайте', type: 'checkbox' },
   ]},
   { id: 'works', title: 'Наши работы', table: 'works', fields: [
@@ -184,6 +202,7 @@ export default function AdminPanel() {
                   <span className="mb-1 block text-sm font-semibold text-slate-700">{field.label}</span>
                   {field.type === 'checkbox' ? <input type="checkbox" checked={Boolean(editing[field.key])} onChange={e => updateField(field.key, e.target.checked)} className="h-5 w-5 accent-orange-600" />
                     : field.type === 'textarea' ? <textarea value={String(editing[field.key] ?? '')} onChange={e => updateField(field.key, e.target.value)} rows={3} className="w-full rounded-lg border border-slate-300 bg-white p-3" />
+                    : field.type === 'select' ? <select required={field.required} value={String(editing[field.key] ?? '')} onChange={e => updateField(field.key, e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white p-3"><option value="">Выберите категорию</option>{(field.options || []).map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
                     : <input type={field.type === 'number' ? 'number' : field.type === 'url' ? 'url' : 'text'} required={field.required} value={String(editing[field.key] ?? '')} onChange={e => updateField(field.key, field.type === 'number' ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white p-3" />}
                 </label>)}
                 {section.fields.some(field => field.key === 'image_url') && <label className="sm:col-span-2"><span className="mb-1 block text-sm font-semibold text-slate-700">Загрузить новое фото</span><input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} className="block w-full text-sm" /><span className="mt-1 block text-xs text-slate-500">Фото загрузится в защищённое хранилище сайта после сохранения.</span></label>}
