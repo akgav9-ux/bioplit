@@ -119,7 +119,16 @@ export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(defaultCatalog);
   const [workItems, setWorkItems] = useState<WorkItem[]>(defaultWorksData);
-  const [priceItems, setPriceItems] = useState<Array<{ id: string; title: string; category: string; price: string; unit: string; description: string }>>([]);
+  const [priceItems, setPriceItems] = useState<Array<{ id: string; title: string; category: string; price: string; unit: string; description: string }>>([
+    { id: 'sample-1', title: 'Фасадная плитка', category: 'Фасадная плитка и камень', price: '2400', unit: 'м²', description: 'Предварительная цена за квадратный метр' },
+    { id: 'sample-2', title: 'Искусственный камень', category: 'Фасадная плитка и камень', price: '2900', unit: 'м²', description: 'Предварительная цена за квадратный метр' },
+    { id: 'sample-3', title: 'Цокольные панели', category: 'Цокольные панели', price: '1800', unit: 'м²', description: 'Предварительная цена за квадратный метр' },
+    { id: 'sample-4', title: 'Тротуарная плитка', category: 'Брусчатка и тротуарная плитка', price: '1650', unit: 'м²', description: 'Предварительная цена за квадратный метр' },
+    { id: 'sample-5', title: 'Тактильная плитка', category: 'Тактильная плитка', price: '2200', unit: 'м²', description: 'Предварительная цена за квадратный метр' },
+    { id: 'sample-6', title: 'Бордюр тротуарный', category: 'Бордюры и водостоки', price: '450', unit: 'шт.', description: 'Предварительная цена за штуку' },
+    { id: 'sample-7', title: 'Водоотводной лоток', category: 'Бордюры и водостоки', price: '550', unit: 'шт.', description: 'Предварительная цена за штуку' },
+    { id: 'sample-8', title: 'Цветочный вазон', category: 'Цветочные вазоны', price: '6900', unit: 'шт.', description: 'Предварительная цена за штуку' },
+  ]);
   const [siteSettings, setSiteSettings] = useState<Record<string, string>>({});
   const [serviceItems, setServiceItems] = useState([
     { n: '01', t: 'Монтаж фасада под ключ', d: 'Подсистема, утеплитель, плитка, затирка. Бригада 4 чел, от 80 м² за 5 дней.' },
@@ -744,7 +753,7 @@ export default function App() {
       <section id="prices" className="bg-white py-12 lg:py-16 border-t border-gray-100">
           <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
             <h2 className="text-[26px] lg:text-[34px] font-black">Прайс-лист</h2>
-            <p className="mt-2 text-sm text-[#5A667A]">Уточняйте наличие и итоговую стоимость по телефону.</p>
+            <p className="mt-2 text-sm text-[#5A667A]">Предварительные цены для ознакомления. Актуальную стоимость уточняйте у менеджера.</p>
             {priceItems.length > 0 ? (
               <div className="mt-7 overflow-x-auto rounded-lg border border-gray-100">
                 <table className="w-full min-w-[520px] text-left text-sm">
